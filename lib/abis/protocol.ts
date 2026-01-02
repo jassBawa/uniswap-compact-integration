@@ -1174,6 +1174,12 @@ export const SEPOLIA_TOKENS = [
     decimals: 18,
   },
   {
+    address: "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238" as const,
+    symbol: "USDC",
+    name: "USDC Token",
+    decimals: 18,
+  },
+  {
     address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14" as const,
     symbol: "WETH",
     name: "Wrapped Ether",

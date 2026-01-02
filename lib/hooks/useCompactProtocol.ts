@@ -254,9 +254,22 @@ export function useForcedWithdrawal() {
     [writeContract]
   );
 
+  const disableForcedWithdrawal = useCallback(
+    async (id: bigint) => {
+      writeContract({
+        address: PROTOCOL_ADDRESS,
+        abi: COMPACT_ABI,
+        functionName: 'disableForcedWithdrawal',
+        args: [id]
+      });
+    },
+    [writeContract]
+  );
+
   return {
     enableForcedWithdrawal,
     forcedWithdrawal,
+    disableForcedWithdrawal,
     hash,
     isWriting,
     isConfirming,
@@ -273,7 +286,10 @@ export function useForcedWithdrawalStatus(account: Address | undefined, id: bigi
     abi: COMPACT_ABI,
     functionName: 'getForcedWithdrawalStatus',
     args: account && id ? [account, id] : undefined,
-    query: { enabled: !!account && !!id }
+    query: {
+      enabled: !!account && !!id,
+      refetchInterval: 3000, // Auto-refresh every 3 seconds
+    }
   });
 }
 

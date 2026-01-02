@@ -10,25 +10,43 @@ export const DEFAULT_LOCK_TAG = '0x000000000000000000000000' as const;
 
 export const PROTOCOL_ABI_PATH = './lib/abis/protocol.json';
 
-
-
 export const DEFAULT_ALLOCATOR_HEX = "13f18f079b52276faad179";
+
+// Protocol enums
+export const SCOPES = {
+    0: "Multichain",
+    1: "Chain-Specific",
+} as const;
+
+export const FORCED_WITHDRAWAL_STATUS = {
+    0: "Disabled",
+    1: "Pending",
+    2: "Enabled",
+} as const;
+
+export const RESET_PERIODS = {
+    0: { label: "1 Second", seconds: 1 },
+    1: { label: "10 Minutes", seconds: 600 },
+    2: { label: "1 Hour", seconds: 3600 },
+    3: { label: "1 Day", seconds: 86400 },
+    4: { label: "5 Days", seconds: 432000 },
+    5: { label: "10 Days", seconds: 864000 },
+    6: { label: "30 Days", seconds: 2592000 },
+} as const;
+
+export type ResetPeriodKey = keyof typeof RESET_PERIODS;
+export type ScopeKey = keyof typeof SCOPES;
+export type ForcedWithdrawalStatusKey = keyof typeof FORCED_WITHDRAWAL_STATUS;
 
 export function buildLockTag(
     scope: number,
     resetPeriod: number,
     allocatorHex: string = DEFAULT_ALLOCATOR_HEX
 ): `0x${string}` {
-    // Solidity computes: lockTag = shl(255, scope) | shl(252, resetPeriod) | shl(160, allocatorId)
-    // lockTag is bytes12 = 96 bits = 24 hex chars
-    // First byte: bit 255 (scope) + bits 252-254 (resetPeriod) + bits 248-251 (unused)
-    const firstByte = 
-    ((resetPeriod & 0x7) << 4) | ((scope & 0x1) << 7);
+    const firstByte =
+        ((resetPeriod & 0x7) << 4) | ((scope & 0x1) << 7);
     const firstByteHex = firstByte.toString(16).padStart(2, "0");
-    // Allocator portion: full 40 hex chars (20 bytes) of address
     const allocatorClean = allocatorHex.replace(/^0x/, "").toLowerCase();
-    // Total should be 24 hex chars = 12 bytes
-    // 2 (firstByte) + 22 (allocator = last 11 bytes of address) = 24 hex chars
     const allocHex = allocatorClean.slice(-22).padStart(22, "0");
     const hexOnly = `${firstByteHex}${allocHex}`;
     return `0x${hexOnly}` as `0x${string}`;
