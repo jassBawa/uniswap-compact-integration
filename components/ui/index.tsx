@@ -1,8 +1,8 @@
-export { Badge, StatusDot } from "./badge"
-export { Button } from "./button"
-export { Card, CardContent, CardFooter, CardHeader } from "./card"
-export { Dropdown } from "./dropdown"
-export { FormInput } from "./form-input"
-export { Input } from "./input"
-export { Label } from "./label"
-export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs"
+export * from "./badge";
+export * from "./button";
+export * from "./card";
+export * from "./dropdown";
+export * from "./form-input";
+export * from "./input";
+export * from "./label";
+export * from "./tabs";
