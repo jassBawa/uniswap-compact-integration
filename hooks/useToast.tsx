@@ -1,5 +1,3 @@
-"use client";
-
 import { toast } from "sonner";
 
 type ToastStatus = "success" | "error" | "info" | "warning" | "loading";
@@ -37,10 +35,16 @@ export function useToast() {
         toast.dismiss();
     };
 
+    const updateToast = (id: number | string, type: ToastStatus, message: string, txHash?: string) => {
+        toast.dismiss(id);
+        return showToast(type, message, txHash);
+    };
+
     return {
         toasts: [],
         showToast,
         dismissToast,
         dismissAll,
+        updateToast,
     };
 }

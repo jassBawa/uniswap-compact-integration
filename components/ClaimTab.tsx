@@ -1,110 +1,169 @@
 'use client';
 
-import { AlertTriangle, ExternalLink } from "lucide-react";
-import { useState, useCallback } from 'react';
+import { AlertTriangle, ExternalLink, User } from "lucide-react";
+import { useState, useCallback, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { parseEther, isAddress } from 'viem';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge, StatusDot } from '@/components/ui/badge';
-import { EXPLORER_URL, DEFAULT_LOCK_TAG } from '@/lib/constants';
-import { useClaim } from '@/lib/hooks/useCompactProtocol';
+import { EXPLORER_URL } from '@/lib/constants';
+import { useCompactClaim } from '@/hooks/useCompactClaim';
+import { useWaitForTransactionReceipt } from 'wagmi';
 import { Button } from '@/components/ui/button';
+
+interface ClaimFormData {
+  id: string;
+  amount: string;
+  recipient: string;
+  sponsor: string;
+  nonce: string;
+  expires: string;
+}
 
 export function ClaimTab() {
   const { address, isConnected } = useAccount();
-  const { claim, hash, isWriting, isConfirming, isConfirmed, writeError } = useClaim();
-
-  const [claimId, setClaimId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [recipient, setRecipient] = useState('');
-  const [lockTag, setLockTag] = useState<string>(DEFAULT_LOCK_TAG);
-  const [isWithdrawMode, setIsWithdrawMode] = useState(false);
+  const { handleClaim, hash: hookHash, writeError } = useCompactClaim();
+  const [claimMode, setClaimMode] = useState<'transfer' | 'withdraw'>('transfer');
+  const [formData, setFormData] = useState<ClaimFormData>({
+    id: '',
+    amount: '',
+    recipient: '',
+    sponsor: '',
+    nonce: '',
+    expires: '',
+  });
+  const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isPending = isWriting || isConfirming;
-  const txSuccess = isConfirmed;
+  // Use wagmi's built-in transaction receipt tracking
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: hookHash,
+  });
 
-  const handleClaim = useCallback(async () => {
+  // Auto-fill sponsor from connected wallet
+  const handleFillSponsor = useCallback(() => {
+    if (address) {
+      setFormData(prev => ({ ...prev, sponsor: address }));
+    }
+  }, [address]);
+
+  // Auto-fill recipient from connected wallet
+  const handleFillRecipient = useCallback(() => {
+    if (address) {
+      setFormData(prev => ({ ...prev, recipient: address }));
+    }
+  }, [address]);
+
+  // Calculate expires timestamp (default: 1 hour from now)
+  const handleSetDefaultExpiry = useCallback(() => {
+    const expires = Math.floor(Date.now() / 1000) + 3600;
+    setFormData(prev => ({ ...prev, expires: expires.toString() }));
+  }, []);
+
+  const handleClaimClick = useCallback(async () => {
     setError(null);
+    setIsPending(true);
 
     if (!address) {
       setError('Wallet not connected');
+      setIsPending(false);
       return;
     }
 
-    if (!claimId || parseFloat(claimId) < 0) {
+    // Validate required fields
+    if (!formData.id || parseFloat(formData.id) < 0) {
       setError('Invalid token ID');
+      setIsPending(false);
       return;
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
       setError('Invalid amount');
+      setIsPending(false);
       return;
     }
 
-    const finalRecipient = recipient || address;
+    const finalRecipient = formData.recipient || address;
     if (!isAddress(finalRecipient)) {
       setError('Invalid recipient address');
+      setIsPending(false);
+      return;
+    }
+
+    const sponsor = formData.sponsor || address;
+    if (!isAddress(sponsor)) {
+      setError('Invalid sponsor address');
+      setIsPending(false);
       return;
     }
 
     try {
-      const effectiveLockTag = isWithdrawMode ? DEFAULT_LOCK_TAG : lockTag;
+      // Determine lockTag based on claim mode
+      // Transfer mode: lockTag = 0 (transfer ERC-6909 to recipient)
+      // Withdraw mode: lockTag = id (withdraw to underlying tokens)
+      const effectiveLockTag = claimMode === 'withdraw' ? formData.id : '0x000000000000000000000000';
 
-      await claim({
-        id: BigInt(claimId),
-        amount: parseEther(amount),
-        lockTag: effectiveLockTag as `0x${string}`,
+      // Signatures are now generated automatically by the hook
+      // No need to pass them manually
+
+      await handleClaim({
+        lockId: formData.id,
+        amount: parseEther(formData.amount),
+        sponsorAddr: sponsor as `0x${string}`,
         recipient: finalRecipient as `0x${string}`,
-        allocatorData: undefined,
-        sponsorSignature: undefined,
-        sponsor: undefined,
-        nonce: undefined,
-        expires: undefined
+        lockTag: effectiveLockTag as `0x${string}`,
       });
+
+      // isPending will be cleared when the transaction is confirmed
+      // Transaction tracking is handled by useWaitForTransactionReceipt
     } catch (err: any) {
       setError(err.message || 'Claim failed. Make sure you have proper signatures.');
+      setIsPending(false);
     }
-  }, [address, claimId, amount, recipient, lockTag, isWithdrawMode, claim]);
+  }, [address, formData, claimMode, handleClaim]);
 
-  const handleFillFromBalance = useCallback(() => {
-    if (address) {
-      setRecipient(address);
+  // Show write error from the hook
+  useEffect(() => {
+    if (writeError) {
+      setError(writeError.message || 'Transaction failed');
+      setIsPending(false);
     }
-  }, [address]);
+  }, [writeError]);
 
   return (
-    <Card className="p-0">
+    <Card padding="none">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Claim</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {isWithdrawMode
-                ? 'Withdraw underlying tokens to recipient'
-                : 'Claim ERC-6909 tokens or transfer to another address'
+              {claimMode === 'withdraw'
+                ? 'Convert ERC-6909 tokens back to underlying assets'
+                : 'Transfer ERC-6909 tokens to another address'
               }
             </p>
           </div>
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setIsWithdrawMode(false)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${!isWithdrawMode
-                ? 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30'
-                : 'bg-secondary text-muted-foreground border border-border hover:bg-muted'
-                }`}
+              onClick={() => setClaimMode('transfer')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                claimMode === 'transfer'
+                  ? 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30'
+                  : 'bg-secondary text-muted-foreground border border-border hover:bg-muted'
+              }`}
             >
               Transfer
             </button>
             <button
               type="button"
-              onClick={() => setIsWithdrawMode(true)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${isWithdrawMode
-                ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
-                : 'bg-secondary text-muted-foreground border border-border hover:bg-muted'
-                }`}
+              onClick={() => setClaimMode('withdraw')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                claimMode === 'withdraw'
+                  ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
+                  : 'bg-secondary text-muted-foreground border border-border hover:bg-muted'
+              }`}
             >
               Withdraw
             </button>
@@ -113,55 +172,60 @@ export function ClaimTab() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {isWithdrawMode && (
+        {claimMode === 'withdraw' && (
           <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <p className="text-sm text-amber-600">Withdraw Mode</p>
+              <p className="text-sm text-amber-600 font-medium">Withdraw Mode</p>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Withdrawing converts ERC-6909 tokens back to underlying tokens (ETH or ERC-20).
+              Converting ERC-6909 tokens back to underlying tokens.
               Tokens are sent directly to the recipient address.
             </p>
           </div>
         )}
 
-        <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-2">Token ID (ERC-6909)</label>
+        {/* Resource Lock ID */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-muted-foreground">
+            Resource Lock ID
+          </label>
           <Input
             type="text"
             placeholder="0"
-            value={claimId}
-            onChange={(e) => setClaimId(e.target.value)}
+            value={formData.id}
+            onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
             disabled={!isConnected || isPending}
             className="font-mono"
           />
-          <p className="mt-1 text-xs text-muted-foreground">
-            The ERC-6909 token ID you want to claim
+          <p className="text-xs text-muted-foreground">
+            The ERC-6909 token ID (e.g., from your deposit)
           </p>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-medium text-muted-foreground">Amount</label>
-          </div>
+        {/* Amount */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-muted-foreground">
+            Amount
+          </label>
           <Input
             type="text"
             placeholder="0.0000"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={formData.amount}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
             disabled={!isConnected || isPending}
             className="font-mono"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-2">
+        {/* Recipient */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-muted-foreground">
             Recipient Address
-            {address && !recipient && (
+            {address && !formData.recipient && (
               <button
                 type="button"
-                onClick={handleFillFromBalance}
+                onClick={handleFillRecipient}
                 className="ml-2 text-xs text-emerald-600 hover:text-emerald-500 transition-colors"
               >
                 (use my address)
@@ -171,51 +235,98 @@ export function ClaimTab() {
           <Input
             type="text"
             placeholder="0x..."
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
+            value={formData.recipient}
+            onChange={(e) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
             disabled={!isConnected || isPending}
-            className={`font-mono ${recipient && !isAddress(recipient) ? 'border-red-500' : ''}`}
+            className={`font-mono ${formData.recipient && !isAddress(formData.recipient) ? 'border-red-500' : ''}`}
           />
-          {recipient && !isAddress(recipient) && (
-            <p className="mt-1 text-xs text-red-500">Invalid address</p>
+          {formData.recipient && !isAddress(formData.recipient) && (
+            <p className="text-xs text-red-500">Invalid address</p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">
-            {isWithdrawMode
+          <p className="text-xs text-muted-foreground">
+            {claimMode === 'withdraw'
               ? 'Underlying tokens will be sent to this address'
               : 'ERC-6909 tokens will be transferred to this address'
             }
           </p>
         </div>
 
-        {!isWithdrawMode && (
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-2">Lock Tag (optional)</label>
-            <Input
-              type="text"
-              placeholder="0x..."
-              value={lockTag}
-              onChange={(e) => setLockTag(e.target.value)}
-              disabled={!isConnected || isPending}
-              className="font-mono text-xs"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Leave empty to use the same lockTag from the original deposit
-            </p>
+        {/* Sponsor Section */}
+        <div className="border-t border-border pt-4 mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <User className="w-4 h-4 text-muted-foreground" />
+            <label className="text-sm font-medium text-foreground">Sponsor Details</label>
           </div>
-        )}
 
-        <div className="p-3 bg-secondary/50 rounded-lg border border-border">
-          <p className="text-xs text-muted-foreground mb-2">
-            <span className="font-medium text-amber-600">Demo Mode Notice:</span>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-muted-foreground">
+                Sponsor Address
+                {address && !formData.sponsor && (
+                  <button
+                    type="button"
+                    onClick={handleFillSponsor}
+                    className="ml-2 text-xs text-emerald-600 hover:text-emerald-500 transition-colors"
+                  >
+                    (use my address)
+                  </button>
+                )}
+              </label>
+              <Input
+                type="text"
+                placeholder="0x..."
+                value={formData.sponsor}
+                onChange={(e) => setFormData(prev => ({ ...prev, sponsor: e.target.value }))}
+                disabled={!isConnected || isPending}
+                className="font-mono"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-muted-foreground">
+                  Nonce
+                </label>
+                <Input
+                  type="text"
+                  placeholder="0"
+                  value={formData.nonce}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nonce: e.target.value }))}
+                  disabled={!isConnected || isPending}
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  Expires
+                  <button
+                    type="button"
+                    onClick={handleSetDefaultExpiry}
+                    className="text-xs text-emerald-600 hover:text-emerald-500 transition-colors"
+                    title="Set to 1 hour from now"
+                  >
+                    (+1hr)
+                  </button>
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Unix timestamp"
+                  value={formData.expires}
+                  onChange={(e) => setFormData(prev => ({ ...prev, expires: e.target.value }))}
+                  disabled={!isConnected || isPending}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Auto-generated signatures notice */}
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+          <p className="text-sm text-emerald-600 font-medium">Auto-Generated Signatures</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Signatures are automatically generated from your wallet (sponsor) and the allocator private key (configured in env).
           </p>
-          <p className="text-xs text-muted-foreground">
-            This is a simplified demo. For real claims, you need:
-          </p>
-          <ul className="text-xs text-muted-foreground mt-1 ml-4 list-disc">
-            <li>Valid sponsor signature (EIP-712)</li>
-            <li>Valid allocator authorization</li>
-            <li>Valid nonce and expiration</li>
-          </ul>
         </div>
       </CardContent>
 
@@ -226,38 +337,39 @@ export function ClaimTab() {
           </div>
         )}
 
-        {hash && (
+        {hookHash && (
           <div className="w-full p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <StatusDot status={isPending ? 'pending' : txSuccess ? 'online' : 'error'} />
+              <StatusDot status={isConfirming ? 'pending' : isConfirmed ? 'online' : 'error'} />
               <span className="text-sm font-medium text-emerald-600">
-                {isPending ? 'Transaction Pending' : txSuccess ? 'Transaction Confirmed' : 'Transaction Failed'}
+                {isConfirming ? 'Transaction Pending' : isConfirmed ? 'Transaction Confirmed' : 'Transaction Failed'}
               </span>
             </div>
             <a
-              href={`${EXPLORER_URL}/tx/${hash}`}
+              href={`${EXPLORER_URL}/tx/${hookHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-emerald-600 hover:underline flex items-center gap-1"
             >
-              {hash.slice(0, 10)}...{hash.slice(-8)}
+              {hookHash.slice(0, 10)}...{hookHash.slice(-8)}
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         )}
 
         <Button
-          onClick={handleClaim}
-          disabled={!isConnected || isPending || !claimId || !amount}
-          loading={isPending}
-          className=""
-          variant={isWithdrawMode ? 'default' : 'default'}
+          onClick={handleClaimClick}
+          disabled={!isConnected || isPending || !formData.id || !formData.amount}
+          loading={isPending || isConfirming}
+          className="w-full"
         >
-          {isPending
-            ? 'Processing...'
-            : isWithdrawMode
-              ? 'Withdraw Tokens'
-              : 'Submit Claim'
+          {isConfirming
+            ? 'Confirming...'
+            : isPending
+              ? 'Signing...'
+              : claimMode === 'withdraw'
+                ? 'Withdraw Tokens'
+                : 'Submit Claim'
           }
         </Button>
       </CardFooter>

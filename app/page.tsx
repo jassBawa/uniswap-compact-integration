@@ -5,7 +5,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-[#0f1419] text-foreground">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-[#0f1419] text-foreground">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-2xl">
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center justify-between mb-2">

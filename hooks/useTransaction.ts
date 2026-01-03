@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback, useEffect } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useToast } from "./useToast";
@@ -17,7 +15,7 @@ interface UseTransactionOptions {
 export function useTransaction({ onSuccess, onError }: UseTransactionOptions = {}) {
   const { showToast, updateToast } = useToast();
   const queryClient = useQueryClient();
-  const [lastToastId, setLastToastId] = useState<number | null>(null);
+  const [lastToastId, setLastToastId] = useState<number | string | null>(null);
 
   const { data: hash, writeContract, isPending, error, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });

@@ -20,7 +20,7 @@ export default function DepositForm() {
     const [depositType, setDepositType] = useState<"native" | "erc20">("native");
     const [amount, setAmount] = useState("");
     const [tokenAddress, setTokenAddress] = useState("");
-    const [resetPeriod, setResetPeriod] = useState<number>(0);
+    const [resetPeriod, setResetPeriod] = useState<number>(1);
     const [scope, setScope] = useState<number>(0);
     const [recipient, setRecipient] = useState("");
     const [lastLockId, setLastLockId] = useState<string | null>(null);

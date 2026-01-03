@@ -46,12 +46,16 @@ export function WithdrawTab() {
     });
     const balance = balanceRaw as bigint | undefined;
 
+    // Only fetch forced withdrawal status when we have a real address
+    // This ensures we're checking the correct user's status for the lock
+    const hasValidAddress = address && address !== '0x0000000000000000000000000000000000000000';
+
     const withdrawalStatusData = useReadContract({
         address: PROTOCOL_ADDRESS as `0x${string}`,
         abi: COMPACT_ABI,
         functionName: "getForcedWithdrawalStatus",
-        args: address && lockId ? [address, BigInt(lockId)] : undefined,
-        query: { enabled: !!address && !!lockId },
+        args: hasValidAddress && lockId ? [address, BigInt(lockId)] : undefined,
+        query: { enabled: hasValidAddress && !!lockId },
     }).data as [bigint, bigint] | undefined;
 
     const status = withdrawalStatusData ? Number(withdrawalStatusData[0]) : 0;
@@ -131,6 +135,15 @@ export function WithdrawTab() {
                     </div>
                 )}
 
+                {/* Show status only when we have a valid address to query with */}
+                {lockId && !hasValidAddress && (
+                    <div className="mb-6 p-4 bg-secondary/20 border border-border rounded-xl">
+                        <p className="text-sm text-muted-foreground text-center">
+                            Connect your wallet to check withdrawal status
+                        </p>
+                    </div>
+                )}
+
                 {lockId && withdrawalStatusData && (
                     <div className="mb-8 space-y-8 animate-fade-in">
                         <div className="px-2">
@@ -170,7 +183,8 @@ export function WithdrawTab() {
                     </div>
                 )}
 
-                {status === 0 && lockId && (
+                {/* Show "Enable Forced Withdrawal" only when we have valid status data */}
+                {status === 0 && lockId && hasValidAddress && (
                     <div className="mb-6 group">
                         <Button
                             onClick={() => enableForcedWithdrawal(lockId)}
@@ -188,7 +202,8 @@ export function WithdrawTab() {
                     </div>
                 )}
 
-                {(status === 1 || status === 2) && lockId && (
+                {/* Show withdraw form only when we have valid status data */}
+                {(status === 1 || status === 2) && lockId && hasValidAddress && (
                     <>
                         <div className="mb-4">
                             <FormInput
