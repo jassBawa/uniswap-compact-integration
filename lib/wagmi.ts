@@ -38,23 +38,7 @@ export const config = createConfig({
         return undefined;
       },
     }),
-    // metaMask(),
-    // injected({
-    //   target() {
-    //     // Fallback to standard injected
-    //     if (typeof window === 'undefined') return undefined;
-    //     const ethereum = (window as any).ethereum;
-    //     if (ethereum && !ethereum.isPhantom && !ethereum.isMetaMask) {
-    //       return {
-    //         id: 'injected',
-    //         name: 'Browser Wallet',
-    //         provider: ethereum,
-    //       };
-    //     }
-    //     return undefined;
-    //   },
-    // }),
-    // coinbaseWallet({ appName: 'Compact Protocol Demo' }),
+
   ],
 });
 

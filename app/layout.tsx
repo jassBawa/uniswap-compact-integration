@@ -1,10 +1,6 @@
-import { Toaster } from "@/components/ui/sonner";
-import { queryClient } from "@/lib/wagmi";
-import { WagmiProviderClient } from "@/lib/wagmi-provider";
-import { QueryClientProvider } from "@tanstack/react-query";
+import Providers from "@/components/Providers";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,14 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <WagmiProviderClient>
-            <QueryClientProvider client={queryClient}>
-              <Toaster />
-              {children}
-            </QueryClientProvider>
-          </WagmiProviderClient>
-        </ThemeProvider>
+            <Providers>{children}</Providers>
       </body>
     </html>
   );
