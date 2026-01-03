@@ -1,7 +1,7 @@
 'use client';
 
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import DepositTab from './DepositTab';
 import { ClaimTab } from './ClaimTab';
 import { WithdrawTab } from './WithdrawTab';
