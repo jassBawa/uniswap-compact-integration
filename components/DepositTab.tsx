@@ -9,10 +9,8 @@ import { useCopy } from "@/hooks/useCopy";
 import { useMaxAmount } from "@/hooks/useMaxAmount";
 import { useToast } from "@/hooks/useToast";
 import { RESET_PERIODS } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Dropdown } from "@/components/ui/dropdown";
-import { Input } from "@/components/ui/input";
+import { Dropdown, Input, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 export default function DepositForm() {
