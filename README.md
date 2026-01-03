@@ -207,11 +207,15 @@ NEXT_PUBLIC_ALLOCATOR_PRIVATE_KEY=0x...
 
 **File:** [lib/constants.ts](lib/constants.ts)
 
-```typescript
-CHAIN_ID = 11155111           // Sepolia testnet
-PROTOCOL_ADDRESS = 0x...      // Compact contract address
-RPC_URL = 'https://...'       // Sepolia RPC endpoint
+| Constant | Value |
+|----------|-------|
+| `CHAIN_ID` | `11155111` (Sepolia testnet) |
+| `PROTOCOL_ADDRESS` | `0x5c64fC2846B35F950B653a3135E646B942A9dE55` |
+| `ALLOCATOR_ADDRESS` | `0x5c64fC2846B35F950B653a3135E646B942A9dE55` |
+| `RPC_URL` | `https://sepolia.infura.io/v3/...` |
+| `DEFAULT_ALLOCATOR_HEX` | `13f18f079b52276faad179` |
 
+```typescript
 // Reset periods (indexed by enum value)
 RESET_PERIODS = {
   0: { label: "15 Seconds", seconds: 15 },
