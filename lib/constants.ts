@@ -10,7 +10,7 @@ export const DEFAULT_LOCK_TAG = '0x000000000000000000000000' as const;
 
 export const PROTOCOL_ABI_PATH = './lib/abis/protocol.json';
 
-export const DEFAULT_ALLOCATOR_HEX = "13f18f079b52276faad179";
+export const ALLOCATOR_ID = 24110319327574188268114297n;
 
 // Protocol enums
 export const SCOPES = {
@@ -40,15 +40,30 @@ export type ScopeKey = keyof typeof SCOPES;
 export type ForcedWithdrawalStatusKey = keyof typeof FORCED_WITHDRAWAL_STATUS;
 
 export function buildLockTag(
-    scope: number,
-    resetPeriod: number,
-    allocatorHex: string = DEFAULT_ALLOCATOR_HEX
+  allocatorId: number | bigint,
+  scope: number,
+  resetPeriod: number
 ): `0x${string}` {
-    const firstByte =
-        ((resetPeriod & 0x7) << 4) | ((scope & 0x1) << 7);
-    const firstByteHex = firstByte.toString(16).padStart(2, "0");
-    const allocatorClean = allocatorHex.replace(/^0x/, "").toLowerCase();
-    const allocHex = allocatorClean.slice(-22).padStart(22, "0");
-    const hexOnly = `${firstByteHex}${allocHex}`;
-    return `0x${hexOnly}` as `0x${string}`;
+  if (scope !== 0 && scope !== 1) {
+    throw new Error("scope must be 0 or 1");
+  }
+
+  if (resetPeriod < 0 || resetPeriod > 7) {
+    throw new Error("resetPeriod must be between 0 and 7");
+  }
+
+  const allocatorBigInt = BigInt(allocatorId);
+
+  if (allocatorBigInt >= (1n << 92n)) {
+    throw new Error("allocatorId exceeds 92 bits");
+  }
+
+  // --- Bit packing ---
+  const lockTagBigInt =
+    (BigInt(scope) << 95n) |
+    (BigInt(resetPeriod) << 92n) |
+    allocatorBigInt;
+
+  // --- Convert to bytes12 (24 hex chars) ---
+  return `0x${lockTagBigInt.toString(16).padStart(24, "0")}` as `0x${string}`;
 }

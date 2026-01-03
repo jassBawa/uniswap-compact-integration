@@ -4,7 +4,7 @@ import { isAddress, parseEther } from "viem";
 import { useAccount, useBalance, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 import { useToast } from "./useToast";
-import { buildLockTag, DEFAULT_ALLOCATOR_HEX, PROTOCOL_ADDRESS } from "../lib/constants";
+import { buildLockTag, ALLOCATOR_ID, PROTOCOL_ADDRESS } from "../lib/constants";
 import { COMPACT_ABI } from "../lib/abis/protocol";
 import { mapContractError, copyToClipboard } from "../lib/utils";
 
@@ -12,14 +12,13 @@ interface UseDepositProps {
     onSuccess?: (lockId: string) => void;
 }
 
-
 export function useDeposit({ onSuccess }: UseDepositProps = {}) {
     const { address } = useAccount();
     const { showToast, dismissAll } = useToast();
     const queryClient = useQueryClient();
     const toastIdRef = useRef<number | string | null>(null);
 
-    const { data: hash, writeContract, isPending, error, reset } = useWriteContract();
+    const { data: hash, mutate, isPending, error, reset } = useWriteContract();
     const { isLoading: isConfirming, isSuccess, data: receipt } = useWaitForTransactionReceipt({ hash });
 
     const { data: ethBalance, queryKey: balanceQueryKey } = useBalance({ address });
@@ -90,18 +89,20 @@ export function useDeposit({ onSuccess }: UseDepositProps = {}) {
     }) => {
         if (!address || !amount) return;
 
+
         const parsedAmount = parseEther(amount);
         if (type === "native" && ethBalance && ethBalance.value < parsedAmount) {
             showToast("error", "Insufficient ETH balance");
             return;
         }
 
-        const lockTag = buildLockTag(scope, resetPeriod, DEFAULT_ALLOCATOR_HEX);
+        const lockTag = buildLockTag(ALLOCATOR_ID, scope, resetPeriod);
+        console.log(`locktag: ${lockTag}`);
         const recipientAddr = recipient && isAddress(recipient) ? recipient : address;
 
         try {
             if (type === "native") {
-                writeContract({
+                mutate({
                     address: PROTOCOL_ADDRESS as `0x${string}`,
                     abi: COMPACT_ABI,
                     functionName: "depositNative",
@@ -110,7 +111,7 @@ export function useDeposit({ onSuccess }: UseDepositProps = {}) {
                 });
             } else {
                 if (!tokenAddress || !isAddress(tokenAddress)) throw new Error("Invalid token address");
-                writeContract({
+                mutate({
                     address: PROTOCOL_ADDRESS as `0x${string}`,
                     abi: COMPACT_ABI,
                     functionName: "depositERC20",
@@ -118,9 +119,10 @@ export function useDeposit({ onSuccess }: UseDepositProps = {}) {
                 });
             }
         } catch (err) {
+            console.error("ERROR: ", err);
             showToast("error", mapContractError(err));
         }
-    }, [address, ethBalance, writeContract, showToast]);
+    }, [address, ethBalance, mutate, showToast]);
 
     return {
         deposit,

@@ -3,7 +3,7 @@
 import { ArrowUpFromLine, Clock, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { formatEther } from "viem";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useConnection, useReadContract } from "wagmi";
 import { useWithdraw } from "../hooks/useWithdraw";
 import { useCountdown } from "../hooks/useCountdown";
 import { FormInput, Button, Card } from "./ui";
@@ -13,7 +13,7 @@ import { PROTOCOL_ADDRESS, SCOPES, FORCED_WITHDRAWAL_STATUS, RESET_PERIODS } fro
 import { formatAddress } from "../lib/utils";
 
 export function WithdrawTab() {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = useConnection();
     const [lockId, setLockId] = useState("");
     const [withdrawAmount, setWithdrawAmount] = useState("");
     const [withdrawRecipient, setWithdrawRecipient] = useState("");
