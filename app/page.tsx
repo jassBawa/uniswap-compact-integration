@@ -1,5 +1,5 @@
 "use client"
-import { Card } from '../components/ui/card';
+import { Card } from '../components/ui';
 import { WalletConnect } from '../components/WalletConnect';
 import { ProtocolTabs } from '../components/ProtocolTabs';
 import { ThemeToggle } from '../components/ThemeToggle';

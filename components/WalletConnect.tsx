@@ -2,11 +2,9 @@
 
 import { Copy, CreditCard, LogOut, Wallet } from 'lucide-react';
 import { useAccount, useBalance, useDisconnect, useConnect, useConnectors } from 'wagmi';
-import { Card, CardContent } from './ui/card';
-import { Badge, StatusDot } from './ui/badge';
+import { Card, CardContent, Badge, StatusDot, Button } from './ui';
 import { formatAddress, formatBalance, copyToClipboard } from '../lib/utils';
 import { CHAIN_NAME } from '../lib/constants';
-import { Button } from './ui/button';
 import { useCopy } from '../hooks/useCopy';
 
 export function WalletConnect() {
