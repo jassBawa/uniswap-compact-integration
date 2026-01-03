@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useToast } from "./useToast";
 import { useQueryClient } from "@tanstack/react-query";
-import { mapContractError } from "@/lib/utils";
+import { mapContractError } from "../lib/utils";
 
 interface UseTransactionOptions {
   onSuccess?: (hash: string) => void;

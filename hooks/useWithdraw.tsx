@@ -6,10 +6,10 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { COMPACT_ABI } from "@/lib/abis/protocol";
+import { COMPACT_ABI } from "../lib/abis/protocol";
 import { useToast } from "./useToast";
-import { PROTOCOL_ADDRESS } from "@/lib/constants";
-import { mapContractError } from "@/lib/utils";
+import { PROTOCOL_ADDRESS } from "../lib/constants";
+import { mapContractError } from "../lib/utils";
 
 export function useWithdraw() {
   const { address } = useAccount();

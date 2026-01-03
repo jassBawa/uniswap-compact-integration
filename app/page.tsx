@@ -1,8 +1,8 @@
 "use client"
-import { Card } from '@/components/ui/card';
-import { WalletConnect } from '@/components/WalletConnect';
-import { ProtocolTabs } from '@/components/ProtocolTabs';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Card } from '../components/ui/card';
+import { WalletConnect } from '../components/WalletConnect';
+import { ProtocolTabs } from '../components/ProtocolTabs';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export default function Home() {
   return (

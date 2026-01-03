@@ -1,7 +1,7 @@
 import { hashTypedData, keccak256, concat } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { COMPACT_ABI } from '@/lib/abis/protocol';
-import { CHAIN_ID, PROTOCOL_ADDRESS } from '@/lib/constants';
+import { COMPACT_ABI } from '../lib/abis/protocol';
+import { CHAIN_ID, PROTOCOL_ADDRESS } from '../lib/constants';
 import { useSignTypedData, useWriteContract } from 'wagmi';
 
 // EIP-712 domain for Sepolia

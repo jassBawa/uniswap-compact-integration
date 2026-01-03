@@ -4,9 +4,9 @@ import { isAddress, parseEther } from "viem";
 import { useAccount, useBalance, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 import { useToast } from "./useToast";
-import { buildLockTag, DEFAULT_ALLOCATOR_HEX, PROTOCOL_ADDRESS } from "@/lib/constants";
-import { COMPACT_ABI } from "@/lib/abis/protocol";
-import { mapContractError, copyToClipboard } from "@/lib/utils";
+import { buildLockTag, DEFAULT_ALLOCATOR_HEX, PROTOCOL_ADDRESS } from "../lib/constants";
+import { COMPACT_ABI } from "../lib/abis/protocol";
+import { mapContractError, copyToClipboard } from "../lib/utils";
 
 interface UseDepositProps {
     onSuccess?: (lockId: string) => void;

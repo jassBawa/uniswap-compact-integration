@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
-import { CHAIN_ID, RPC_URL, PROTOCOL_ADDRESS } from '@/lib/constants';
-import { COMPACT_ABI } from '@/lib/abis/protocol';
+import { CHAIN_ID, RPC_URL, PROTOCOL_ADDRESS } from '../../../lib/constants';
+import { COMPACT_ABI } from '../../../lib/abis/protocol';
 
 const client = createPublicClient({
   chain: {

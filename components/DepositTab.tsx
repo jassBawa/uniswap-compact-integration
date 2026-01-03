@@ -4,14 +4,13 @@ import { ArrowDownToLine, CheckCircle, Coins } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { useDeposit } from "@/hooks/useDeposit";
-import { useCopy } from "@/hooks/useCopy";
-import { useMaxAmount } from "@/hooks/useMaxAmount";
-import { useToast } from "@/hooks/useToast";
-import { RESET_PERIODS } from "@/lib/constants";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Dropdown, Input, Button } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { useDeposit } from "../hooks/useDeposit";
+import { useCopy } from "../hooks/useCopy";
+import { useMaxAmount } from "../hooks/useMaxAmount";
+import { useToast } from "../hooks/useToast";
+import { RESET_PERIODS } from "../lib/constants";
+import { Card, CardHeader, CardContent, Dropdown, Input, Button } from "./ui";
+import { cn } from "../lib/utils";
 
 export default function DepositForm() {
     const { isConnected } = useAccount();

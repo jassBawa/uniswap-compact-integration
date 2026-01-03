@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard } from "../lib/utils";
 
 /**
  * Hook for copying text to clipboard

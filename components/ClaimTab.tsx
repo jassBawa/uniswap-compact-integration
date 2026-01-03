@@ -4,11 +4,11 @@ import { AlertTriangle, ExternalLink, User } from "lucide-react";
 import { useState, useCallback, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { parseEther, isAddress } from 'viem';
-import { Input, StatusDot, Card, CardContent, CardHeader, CardFooter } from "@/components/ui";
-import { EXPLORER_URL } from '@/lib/constants';
-import { useCompactClaim } from '@/hooks/useCompactClaim';
+import { Input, StatusDot, Card, CardContent, CardHeader, CardFooter } from "./ui";
+import { EXPLORER_URL } from '../lib/constants';
+import { useCompactClaim } from '../hooks/useCompactClaim';
 import { useWaitForTransactionReceipt } from 'wagmi';
-import { Button } from '@/components/ui/button';
+import { Button } from "./ui/button";
 
 interface ClaimFormData {
   id: string;

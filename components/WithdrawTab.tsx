@@ -4,15 +4,15 @@ import { ArrowUpFromLine, Clock, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { Card } from "@/components/ui/card";
-import { useWithdraw } from "@/hooks/useWithdraw";
-import { useCountdown } from "@/hooks/useCountdown";
-import { FormInput } from "@/components/ui/form-input";
+import { Card } from "./ui/card";
+import { useWithdraw } from "../hooks/useWithdraw";
+import { useCountdown } from "../hooks/useCountdown";
+import { FormInput } from "./ui/form-input";
 import { TransactionProgress } from "./TransactionProgress";
-import { Button } from "@/components/ui/button";
-import { COMPACT_ABI } from "@/lib/abis/protocol";
-import { PROTOCOL_ADDRESS, SCOPES, FORCED_WITHDRAWAL_STATUS, RESET_PERIODS } from "@/lib/constants";
-import { formatAddress } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { COMPACT_ABI } from "../lib/abis/protocol";
+import { PROTOCOL_ADDRESS, SCOPES, FORCED_WITHDRAWAL_STATUS, RESET_PERIODS } from "../lib/constants";
+import { formatAddress } from "../lib/utils";
 
 export function WithdrawTab() {
     const { address, isConnected } = useAccount();
