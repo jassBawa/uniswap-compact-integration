@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isAddress, parseEther, parseUnits } from "viem";
+import { isAddress, parseUnits } from "viem";
 import {
   useAccount,
   useBalance,
@@ -8,12 +8,12 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { simulateContract } from "@wagmi/core";
+// import { simulateContract } from "@wagmi/core";
 
-import { useToast } from "./useToast";
-import { PROTOCOL_ADDRESS } from "../lib/constants";
 import { COMPACT_ABI, ERC20_ABI } from "../lib/abis/protocol";
-import { mapContractError, copyToClipboard, buildLockTag } from "../lib/utils";
+import { PROTOCOL_ADDRESS } from "../lib/constants";
+import { buildLockTag, copyToClipboard, mapContractError } from "../lib/utils";
+import { useToast } from "./useToast";
 interface UseDepositProps {
   onSuccess?: (lockId: string) => void;
 }
