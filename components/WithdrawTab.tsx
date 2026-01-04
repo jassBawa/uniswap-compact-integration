@@ -1,23 +1,27 @@
 "use client";
 
 import { ArrowUpFromLine, Clock, XCircle } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatEther } from "viem";
-import { useAccount, useConnection, useReadContract } from "wagmi";
+import { useConnection, useReadContract } from "wagmi";
 import { useWithdraw } from "../hooks/useWithdraw";
-import { useCountdown } from "../hooks/useCountdown";
-import { FormInput, Button, Card } from "./ui";
-import { TransactionProgress } from "./TransactionProgress";
 import { COMPACT_ABI } from "../lib/abis/protocol";
-import { PROTOCOL_ADDRESS, SCOPES, FORCED_WITHDRAWAL_STATUS, RESET_PERIODS } from "../lib/constants";
+import { FORCED_WITHDRAWAL_STATUS, PROTOCOL_ADDRESS, RESET_PERIODS, SCOPES } from "../lib/constants";
 import { formatAddress } from "../lib/utils";
+import { TransactionProgress } from "./TransactionProgress";
+import { Button, Card, FormInput } from "./ui";
 
 export function WithdrawTab() {
     const { address, isConnected } = useConnection();
-    const [lockId, setLockId] = useState("");
+    const [lockId, setLockId] = useState(""); // Full resource ID (lockTag << 160 | token)
     const [withdrawAmount, setWithdrawAmount] = useState("");
     const [withdrawRecipient, setWithdrawRecipient] = useState("");
 
+    // Extract lockTag from lockId (first 26 chars = 12 bytes)
+    const lockTag = lockId.length === 66 && lockId.startsWith('0x')
+        ? lockId.slice(0, 26) as `0x${string}`
+        : '';
+    console.log(` lockid -> ${lockId} locktag -- ${lockTag}`);
     const {
         enableForcedWithdrawal,
         disableForcedWithdrawal,
@@ -44,21 +48,46 @@ export function WithdrawTab() {
     });
     const balance = balanceRaw as bigint | undefined;
 
-    // Only fetch forced withdrawal status when we have a real address
-    // This ensures we're checking the correct user's status for the lock
+    // Only fetch forced withdrawal status when we have a valid address AND valid lockId
+    // getForcedWithdrawalStatus takes uint256 id (full lockId), same as other functions
     const hasValidAddress = address && address !== '0x0000000000000000000000000000000000000000';
+    const hasValidLockId = lockId.length === 66 && lockId.startsWith('0x');
 
     const withdrawalStatusData = useReadContract({
         address: PROTOCOL_ADDRESS as `0x${string}`,
         abi: COMPACT_ABI,
         functionName: "getForcedWithdrawalStatus",
-        args: hasValidAddress && lockId ? [address, BigInt(lockId)] : undefined,
-        query: { enabled: hasValidAddress && !!lockId },
+        args: hasValidAddress && hasValidLockId ? [address, BigInt(lockId)] : undefined,
+        query: {
+            enabled: Boolean(hasValidAddress && hasValidLockId),
+            staleTime: 0,
+            refetchOnWindowFocus: true,
+        },
     }).data as [bigint, bigint] | undefined;
 
     const status = withdrawalStatusData ? Number(withdrawalStatusData[0]) : 0;
     const withdrawableAt = withdrawalStatusData ? Number(withdrawalStatusData[1]) : 0;
-    const canWithdraw = useMemo(() => status === 2 || (status === 1 && Date.now() / 1000 >= withdrawableAt), [status, withdrawableAt]);
+    
+    const canWithdraw = useMemo(() => {
+        const isMature = Date.now() / 1000 >= withdrawableAt;
+        // Per docs: withdrawal allowed when status === 1 (Pending) AND maturity passed
+        // Also handle status 2 (Enabled) from contract - require maturity too
+        return (status === 1 || status === 2) && isMature;
+    }, [status, withdrawableAt]);
+
+    // Debug: Log forced withdrawal status
+    useEffect(() => {
+        if (withdrawalStatusData) {
+            console.log(`[ForcedWithdrawalStatus]`, {
+                status: withdrawalStatusData[0]?.toString(),
+                statusName: FORCED_WITHDRAWAL_STATUS[Number(withdrawalStatusData[0]) as keyof typeof FORCED_WITHDRAWAL_STATUS],
+                withdrawableAt: withdrawalStatusData[1]?.toString(),
+                maturityDate: new Date(Number(withdrawalStatusData[1]) * 1000).toISOString(),
+                canWithdraw
+            });
+        }
+    }, [withdrawalStatusData, canWithdraw]);
+
 
     const isActuallyFinished = useMemo(() => (balance === BigInt(0) && (status === 1 || status === 2)) || isSuccess, [balance, status, isSuccess]);
 
@@ -69,7 +98,7 @@ export function WithdrawTab() {
         },
         {
             label: "Wait for Reset Period",
-            status: (status === 0 ? "upcoming" : (status === 1 && !canWithdraw ? "loading" : "success")) as "upcoming" | "loading" | "success"
+            status: (status === 0 ? "upcoming" : ((status === 1 || status === 2) && !canWithdraw ? "loading" : "success")) as "upcoming" | "loading" | "success"
         },
         {
             label: "Execute Withdrawal",
@@ -78,6 +107,8 @@ export function WithdrawTab() {
     ], [status, canWithdraw, isActuallyFinished]);
 
     const handleMaxAmount = useCallback(() => balance && setWithdrawAmount(formatEther(balance)), [balance]);
+
+    console.log(`status -> ${status}, withdrwableat -> ${withdrawableAt} canwithdwra -> ${canWithdraw} isactuallyfinsied -> ${isActuallyFinished}`)
 
     // Check if balance is zero or undefined
     const hasZeroBalance = !balance || balance === BigInt(0);
@@ -93,8 +124,8 @@ export function WithdrawTab() {
                         label="Resource Lock ID"
                         value={lockId}
                         onChange={(e) => setLockId(e.target.value)}
-                        placeholder="Enter lock ID"
-                        helperText="The ERC6909 token ID from your deposit"
+                        placeholder="0x3013f18f079b52276faad1790000000000000000000000000000000000000000"
+                        helperText="Full lock ID from deposit. LockTag is automatically extracted for status check."
                         className="font-mono text-xs break-all"
                     />
                 </div>
@@ -119,7 +150,7 @@ export function WithdrawTab() {
                                 <div className="space-y-1">
                                     <span className="text-[10px] text-muted-foreground font-bold uppercase">Reset Delay</span>
                                     <p className="text-sm text-foreground">
-                                        {RESET_PERIODS[Number(lockDetails[2]) as keyof typeof RESET_PERIODS]?.label || `Unknown`}
+                                        {RESET_PERIODS[Number(lockDetails[2]) as keyof typeof RESET_PERIODS]?.name || `Unknown`}
                                     </p>
                                 </div>
                                 <div className="space-y-1">
@@ -149,26 +180,26 @@ export function WithdrawTab() {
                         </div>
 
                         <div className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${status === 0 ? "bg-secondary/20 border-border" :
-                            status === 1 ? "bg-amber-500/10 border-amber-500/30" :
+                            (status === 1 || (status === 2 && !canWithdraw)) ? "bg-amber-500/10 border-amber-500/30" :
                                 "bg-emerald-500/10 border-emerald-500/30"
                             }`}>
                             <div className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-2 h-2 rounded-full ${status === 0 ? "bg-muted-foreground" :
-                                        status === 1 ? "bg-amber-500 animate-pulse" :
+                                        (status === 1 || (status === 2 && !canWithdraw)) ? "bg-amber-500 animate-pulse" :
                                             "bg-emerald-500"
                                         }`} />
                                     <div>
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-none mb-1">Workflow Status</p>
                                         <h4 className={`text-sm font-bold ${status === 0 ? "text-muted-foreground" :
-                                            status === 1 ? "text-amber-500" :
+                                            (status === 1 || (status === 2 && !canWithdraw)) ? "text-amber-500" :
                                                 "text-emerald-500"
                                             }`}>
                                             {FORCED_WITHDRAWAL_STATUS[status as keyof typeof FORCED_WITHDRAWAL_STATUS]}
                                         </h4>
                                     </div>
                                 </div>
-                                {status === 1 && (
+                                {(status === 1 || status === 2) && !canWithdraw && (
                                     <div className="text-right">
                                         <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-wider mb-1">Maturity Date</p>
                                         <p className="text-xs text-amber-500/80 font-mono">
@@ -200,8 +231,22 @@ export function WithdrawTab() {
                     </div>
                 )}
 
-                {/* Show withdraw form only when we have valid status data */}
+                {/* Show Cancel button when status is 1 or 2 (even before maturity) */}
                 {(status === 1 || status === 2) && lockId && hasValidAddress && (
+                    <div className="mb-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => disableForcedWithdrawal(lockId)}
+                            disabled={isPending || hasZeroBalance}
+                            icon={<XCircle className="w-4 h-4" />}
+                        >
+                            Cancel Forced Withdrawal
+                        </Button>
+                    </div>
+                )}
+
+                {/* Show withdraw form only when status is 1 or 2 AND maturity has passed */}
+                {(status === 1 || status === 2) && canWithdraw && lockId && hasValidAddress && (
                     <>
                         <div className="mb-4">
                             <FormInput
@@ -240,17 +285,7 @@ export function WithdrawTab() {
                                 size="lg"
                                 icon={<ArrowUpFromLine className="w-5 h-5" />}
                             >
-                                {!canWithdraw ? "Waiting for Reset..." : "Withdraw Funds"}
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                onClick={() => disableForcedWithdrawal(lockId)}
-                                disabled={isPending || hasZeroBalance}
-                                className="flex-1 sm:flex-initial sm:w-auto"
-                                icon={<XCircle className="w-4 h-4" />}
-                            >
-                                Cancel
+                                Withdraw Funds
                             </Button>
                         </div>
                     </>

@@ -1,39 +1,64 @@
 "use client";
 
 import { ArrowDownToLine, CheckCircle, Coins } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useConnection } from "wagmi";
+import { isAddress, parseUnits } from 'viem'
 
 import { useDeposit } from "@/hooks/useDeposit";
 import { useCopy } from "@/hooks/useCopy";
 import { useMaxAmount } from "@/hooks/useMaxAmount";
 import { useToast } from "@/hooks/useToast";
-import { RESET_PERIODS } from "@/lib/constants";
+import { RESET_PERIODS, ALLOCATORS } from "@/lib/constants";
 import { Card, CardHeader, CardContent, Dropdown, Input, Button } from "./ui";
 import { cn } from "@/lib/utils";
 
 export default function DepositForm() {
-    const { isConnected } = useAccount();
+    const { isConnected } = useConnection();
     const [depositType, setDepositType] = useState<"native" | "erc20">("native");
     const [amount, setAmount] = useState("");
     const [tokenAddress, setTokenAddress] = useState("");
-    const [resetPeriod, setResetPeriod] = useState<number>(1);
+    const [resetPeriod, setResetPeriod] = useState<number>(2);
     const [scope, setScope] = useState<number>(0);
+    const [allocatorId, setAllocatorId] = useState<bigint>(ALLOCATORS[0].value);
     const [recipient, setRecipient] = useState("");
     const [lastLockId, setLastLockId] = useState<string | null>(null);
 
     const { showToast } = useToast();
     const [copied, copy] = useCopy();
 
-    const { deposit, isPending, ethBalance } = useDeposit({
+    const { deposit, approve, isPending, ethBalance, allowance, isCheckingAllowance, setCheckingTokenAddress } = useDeposit({
         onSuccess: (lockId) => setLastLockId(lockId),
     });
 
     const { handleMax, formattedBalance } = useMaxAmount(ethBalance);
 
+    // Check if approval is needed based on allowance and amount
+    const needsApproval = useMemo(() => {
+        if (depositType !== "erc20") return false;
+        if (!tokenAddress || !amount || !isAddress(tokenAddress)) return false;
+        const allowanceValue = allowance as bigint | undefined;
+        if (!allowanceValue) return true;
+        const parsedAmount = parseUnits(amount, 18);
+        return allowanceValue < parsedAmount;
+    }, [depositType, tokenAddress, amount, allowance]);
+
+    // Trigger allowance check when token address changes
+    useEffect(() => {
+        if (depositType === "erc20" && tokenAddress && isAddress(tokenAddress)) {
+            setCheckingTokenAddress(tokenAddress);
+        }
+    }, [tokenAddress, depositType, setCheckingTokenAddress]);
+
     const resetPeriodOptions = useMemo(() =>
-        Object.entries(RESET_PERIODS).map(([value, { label }]) => ({
+        Object.entries(RESET_PERIODS).map(([value, { name }]) => ({
             value: Number(value),
+            label: name,
+        })), []);
+
+    const allocatorOptions = useMemo(() =>
+        ALLOCATORS.map(({ value, label }) => ({
+            value: value.toString(),
             label,
         })), []);
 
@@ -44,9 +69,10 @@ export default function DepositForm() {
             tokenAddress,
             resetPeriod,
             scope,
+            allocatorId,
             recipient
         });
-    }, [deposit, depositType, amount, tokenAddress, resetPeriod, scope, recipient]);
+    }, [deposit, depositType, amount, tokenAddress, resetPeriod, scope, allocatorId, recipient]);
 
     const handleCopyLockId = useCallback(async () => {
         if (!lastLockId) return;
@@ -133,6 +159,17 @@ export default function DepositForm() {
 
                 <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-muted-foreground ml-0.5">
+                        Allocator
+                    </label>
+                    <Dropdown
+                        options={allocatorOptions}
+                        value={allocatorId.toString()}
+                        onChange={(v) => setAllocatorId(BigInt(v))}
+                    />
+                </div>
+
+                <div className="space-y-1.5">
+                    <label className="block text-xs font-medium text-muted-foreground ml-0.5">
                         Reset Period
                     </label>
                     <Dropdown
@@ -189,23 +226,37 @@ export default function DepositForm() {
                     />
                 </div>
 
-                <Button
-                    onClick={handleDeposit}
-                    disabled={!isConnected || isPending || !amount}
-                    loading={isPending}
-                    className="h-11 text-base font-semibold shadow-sm hover:shadow-md transition-all"
-                    size="lg"
-                >
-                    <ArrowDownToLine className="w-5 h-5" />
-                    {!isConnected ? "Connect Wallet" : isPending ? "Confirming..." : "Deposit"}
-                </Button>
+                {depositType === "erc20" && needsApproval ? (
+                    <Button
+                        onClick={() => tokenAddress && amount && approve({ tokenAddress, amount })}
+                        disabled={!isConnected || isPending || !amount || !tokenAddress || isCheckingAllowance}
+                        loading={isPending}
+                        className="h-11 text-base font-semibold shadow-sm hover:shadow-md transition-all"
+                        size="lg"
+                    >
+                        <ArrowDownToLine className="w-5 h-5" />
+                        {!isConnected ? "Connect Wallet" : isPending ? "Approving..." : isCheckingAllowance ? "Checking..." : "Approve Tokens"}
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={handleDeposit}
+                        disabled={!isConnected || isPending || !amount || isCheckingAllowance}
+                        loading={isPending}
+                        className="h-11 text-base font-semibold shadow-sm hover:shadow-md transition-all"
+                        size="lg"
+                    >
+                        <ArrowDownToLine className="w-5 h-5" />
+                        {!isConnected ? "Connect Wallet" : isPending ? "Confirming..." : isCheckingAllowance ? "Checking..." : "Deposit"}
+                    </Button>
+                )}
 
                 {lastLockId && (
                     <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
                         <p className="text-sm text-emerald-600 mb-2.5 flex items-center gap-2">
                             <CheckCircle className="w-4 h-4" />
-                            <span className="font-medium">Last Deposit Lock ID</span>
+                            <span className="font-medium">Deposit Successful!</span>
                         </p>
+                        <p className="text-xs text-emerald-600 mb-1">Resource Lock ID</p>
                         <div className="flex items-center gap-2">
                             <code className="text-xs bg-emerald-500/10 px-3 py-2 rounded-lg font-mono truncate flex-1 border border-emerald-500/20">
                                 {lastLockId}
@@ -226,6 +277,9 @@ export default function DepositForm() {
                                 )}
                             </Button>
                         </div>
+                        <p className="text-[10px] text-emerald-500 mt-2">
+                            LockTag is automatically derived from this ID for status checks.
+                        </p>
                     </div>
                 )}
             </CardContent>
