@@ -3,7 +3,7 @@
  */
 export function mapContractError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
-
+  console.log(error);
   // Common Compact Errors
   if (message.includes("Expired()")) return "The signature has expired.";
   if (message.includes("InvalidSignature()"))

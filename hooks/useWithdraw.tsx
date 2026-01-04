@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { isAddress, parseEther } from "viem";
 import {
-  useAccount,
+  useConnection,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -12,7 +12,7 @@ import { PROTOCOL_ADDRESS } from "../lib/constants";
 import { mapContractError } from "../lib/utils";
 
 export function useWithdraw() {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { showToast, dismissAll } = useToast();
   const queryClient = useQueryClient();
   const toastIdRef = useRef<number | string | null>(null);
