@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
-import { isAddress, parseEther } from "viem";
+import { isAddress, parseEther, parseUnits } from "viem";
 import {
   useConnection,
   useWaitForTransactionReceipt,
@@ -109,12 +109,14 @@ export function useWithdraw() {
   );
 
   const forcedWithdrawal = useCallback(
-    (lockId: string, recipient: string, amount: string) => {
+    (lockId: string, recipient: string, amount: string, decimals: number = 18) => {
       if (!lockId || !amount || !address) return;
       const recipientAddr =
         recipient && isAddress(recipient) ? recipient : address;
 
       try {
+        // Use parseUnits with the correct decimals, or parseEther for native (18 decimals)
+        const parsedAmount = decimals === 18 ? parseEther(amount) : parseUnits(amount, decimals);
         writeContract({
           address: PROTOCOL_ADDRESS as `0x${string}`,
           abi: COMPACT_ABI,
@@ -122,7 +124,7 @@ export function useWithdraw() {
           args: [
             BigInt(lockId),
             recipientAddr as `0x${string}`,
-            parseEther(amount),
+            parsedAmount,
           ],
         });
       } catch (err) {

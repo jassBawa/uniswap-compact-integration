@@ -24,7 +24,7 @@ export function TransactionProgress({ steps, className = "" }: TransactionProgre
                         />
                     )}
 
-                    <div className="relative flex-shrink-0 z-10 bg-card rounded-full p-0.5">
+                    <div className="relative shrink-0 z-10 bg-card rounded-full p-0.5">
                         {step.status === "success" ? (
                             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                         ) : step.status === "loading" ? (
