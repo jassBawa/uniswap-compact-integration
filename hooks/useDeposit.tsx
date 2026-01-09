@@ -16,9 +16,10 @@ import { buildLockTag, copyToClipboard, mapContractError } from "../lib/utils";
 import { useToast } from "./useToast";
 interface UseDepositProps {
   onSuccess?: (lockId: string) => void;
+  externalAllowance?: bigint;
 }
 
-export function useDeposit({ onSuccess }: UseDepositProps = {}) {
+export function useDeposit({ onSuccess, externalAllowance }: UseDepositProps = {}) {
   const { address } = useAccount();
   const { showToast, dismissAll } = useToast();
   const queryClient = useQueryClient();
@@ -183,12 +184,12 @@ export function useDeposit({ onSuccess }: UseDepositProps = {}) {
             return;
           }
 
-          // Check allowance before depositing
-          const allowanceValue = allowance as bigint | undefined;
+          // Check allowance before depositing - use external if provided
+          const allowanceValue = externalAllowance ?? (allowance as bigint | undefined);
           console.log(
             `[Deposit] Token: ${tokenAddress}, Allowance: ${
               allowanceValue?.toString() ?? "undefined"
-            }, Required: ${parsedAmount.toString()}`
+            }, Required: ${parsedAmount.toString()}, usingExternal: ${!!externalAllowance}`
           );
 
           if (!allowanceValue || allowanceValue < parsedAmount) {
