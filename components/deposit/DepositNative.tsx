@@ -1,15 +1,14 @@
 "use client";
 
-import { ArrowDownToLine, CheckCircle } from "lucide-react";
+import { ArrowDownToLine } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "wagmi";
 
+import { Button, Dropdown, Input } from "@/components/ui";
+import { DepositSuccess } from "./DepositSuccess";
 import { useDepositNative } from "@/hooks/useDepositNative";
-import { useCopy } from "@/hooks/useCopy";
 import { useMaxAmount } from "@/hooks/useMaxAmount";
-import { useToast } from "@/hooks/useToast";
-import { RESET_PERIODS, ALLOCATORS } from "@/lib/constants";
-import { Card, CardContent, Dropdown, Input, Button } from "@/components/ui";
+import { ALLOCATORS, RESET_PERIODS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface DepositNativeProps {
@@ -24,9 +23,6 @@ export function DepositNative({ onSuccess }: DepositNativeProps) {
   const [allocatorId, setAllocatorId] = useState<bigint>(ALLOCATORS[0].value);
   const [recipient, setRecipient] = useState("");
   const [lastLockId, setLastLockId] = useState<string | null>(null);
-
-  const { showToast } = useToast();
-  const [copied, copy] = useCopy();
 
   const { deposit, isPending, ethBalance } = useDepositNative({
     onSuccess: (lockId) => {
@@ -58,12 +54,6 @@ export function DepositNative({ onSuccess }: DepositNativeProps) {
       recipient,
     });
   }, [deposit, amount, resetPeriod, scope, allocatorId, recipient]);
-
-  const handleCopyLockId = useCallback(async () => {
-    if (!lastLockId) return;
-    await copy(lastLockId);
-    showToast("info", "Lock ID copied to clipboard!");
-  }, [lastLockId, copy, showToast]);
 
   return (
       <div className="mt-8 p-2 px-6 space-y-5">
@@ -177,38 +167,7 @@ export function DepositNative({ onSuccess }: DepositNativeProps) {
           {!isConnected ? "Connect Wallet" : isPending ? "Confirming..." : "Deposit"}
         </Button>
 
-        {lastLockId && (
-          <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
-            <p className="text-sm text-emerald-600 mb-2.5 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" />
-              <span className="font-medium">Deposit Successful!</span>
-            </p>
-            <p className="text-xs text-emerald-600 mb-1">Resource Lock ID</p>
-            <div className="flex items-center gap-2">
-              <code className="text-xs bg-emerald-500/10 px-3 py-2 rounded-lg font-mono truncate flex-1 border border-emerald-500/20">
-                {lastLockId}
-              </code>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleCopyLockId}
-                className="shrink-0"
-              >
-                {copied ? (
-                  <>
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    Copied!
-                  </>
-                ) : (
-                  "Copy"
-                )}
-              </Button>
-            </div>
-            <p className="text-[10px] text-emerald-500 mt-2">
-              LockTag is automatically derived from this ID for status checks.
-            </p>
-          </div>
-        )}
+        {lastLockId && <DepositSuccess lockId={lastLockId} />}
       </div>
   );
 }

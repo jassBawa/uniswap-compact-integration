@@ -1,21 +1,21 @@
 'use client';
 
 import { Copy, CreditCard, LogOut, Wallet } from 'lucide-react';
-import { useAccount, useBalance, useDisconnect, useConnect, useConnectors } from 'wagmi';
+import { useConnection, useBalance, useDisconnect, useConnect, useConnectors } from 'wagmi';
 import { Card, CardContent, Badge, StatusDot, Button } from './ui';
-import { formatAddress, formatBalance, copyToClipboard } from '../lib/utils';
-import { CHAIN_NAME } from '../lib/constants';
+import { formatAddress, formatBalance } from '../lib/utils';
+import { CHAIN_ID, CHAIN_NAME } from '../lib/constants';
 import { useCopy } from '../hooks/useCopy';
 
 export function WalletConnect() {
-  const { address, isConnected, chainId, isConnecting } = useAccount();
+  const { address, isConnected, chainId, isConnecting } = useConnection();
   const { data: balance } = useBalance({ address });
-  const { disconnect } = useDisconnect();
-  const { connect } = useConnect();
+  const { mutate: disconnect } = useDisconnect();
+  const { mutate: connect } = useConnect();
   const connectors = useConnectors();
   const [copied, copy] = useCopy();
 
-  const isWrongNetwork = chainId !== 11155111 && chainId !== undefined;
+  const isWrongNetwork = chainId !== CHAIN_ID && chainId !== undefined;
   const availableConnector = connectors[0];
 
   const handleCopyAddress = async () => {

@@ -4,12 +4,12 @@ import { ArrowUpFromLine, Clock, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { formatEther, formatUnits } from "viem";
 import { useConnection, useReadContract } from "wagmi";
-import { useWithdraw } from "../hooks/useWithdraw";
-import { COMPACT_ABI, ERC20_ABI } from "../lib/abis/protocol";
-import { PROTOCOL_ADDRESS } from "../lib/constants";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import { COMPACT_ABI, ERC20_ABI } from "../../lib/abis/protocol";
+import { PROTOCOL_ADDRESS } from "../../lib/constants";
 import { LockDetailsCard } from "./LockDetailsCard";
 import { WithdrawalStatusCard } from "./WithdrawalStatusCard";
-import { Button, Card, FormInput } from "./ui";
+import { Button, Card, FormInput } from "../ui";
 
 export function WithdrawTab() {
   const { address, isConnected } = useConnection();

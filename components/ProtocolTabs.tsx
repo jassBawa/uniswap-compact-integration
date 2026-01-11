@@ -2,9 +2,9 @@
 
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui';
-import DepositTab from './DepositTab';
-import { ClaimTab } from './ClaimTab';
-import { WithdrawTab } from './WithdrawTab';
+import DepositTab from './deposit/DepositTab';
+import { ClaimTab } from './claim/ClaimTab';
+import { WithdrawTab } from './withdraw/WithdrawTab';
 
 const TABS = [
   { id: 'deposit', label: 'Deposit' },

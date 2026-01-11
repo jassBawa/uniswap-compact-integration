@@ -15,7 +15,7 @@ export const config = createConfig({
   },
   connectors: [
     injected({
-      shimDisconnect: true, // ✅ important
+      shimDisconnect: true,
     }),
   ],
 });
