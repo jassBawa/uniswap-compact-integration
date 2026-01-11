@@ -1,113 +1,5 @@
 export const COMPACT_ABI = [
   {
-    inputs: [
-      { internalType: "uint256", name: "allocatedAmount", type: "uint256" },
-      { internalType: "uint256", name: "providedAmount", type: "uint256" },
-    ],
-    name: "AllocatedAmountExceeded",
-    type: "error",
-  },
-  { inputs: [], name: "BalanceOverflow", type: "error" },
-  { inputs: [], name: "ChainIndexOutOfRange", type: "error" },
-  {
-    inputs: [
-      { internalType: "uint256", name: "assignableAt", type: "uint256" },
-    ],
-    name: "EmissaryAssignmentUnavailable",
-    type: "error",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "expiration", type: "uint256" }],
-    name: "Expired",
-    type: "error",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "account", type: "address" },
-      { internalType: "uint256", name: "id", type: "uint256" },
-    ],
-    name: "ForcedWithdrawalAlreadyDisabled",
-    type: "error",
-  },
-  { inputs: [], name: "ForcedWithdrawalFailed", type: "error" },
-  { inputs: [], name: "InconsistentAllocators", type: "error" },
-  { inputs: [], name: "InsufficientBalance", type: "error" },
-  { inputs: [], name: "InsufficientPermission", type: "error" },
-  {
-    inputs: [{ internalType: "address", name: "allocator", type: "address" }],
-    name: "InvalidAllocation",
-    type: "error",
-  },
-  { inputs: [], name: "InvalidBatchAllocation", type: "error" },
-  { inputs: [], name: "InvalidBatchDepositStructure", type: "error" },
-  { inputs: [], name: "InvalidDepositBalanceChange", type: "error" },
-  { inputs: [], name: "InvalidDepositTokenOrdering", type: "error" },
-  { inputs: [], name: "InvalidEmissaryAssignment", type: "error" },
-  { inputs: [], name: "InvalidLockTag", type: "error" },
-  {
-    inputs: [{ internalType: "address", name: "allocator", type: "address" }],
-    name: "InvalidRegistrationProof",
-    type: "error",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
-    name: "InvalidScope",
-    type: "error",
-  },
-  { inputs: [], name: "InvalidSignature", type: "error" },
-  {
-    inputs: [{ internalType: "address", name: "token", type: "address" }],
-    name: "InvalidToken",
-    type: "error",
-  },
-  { inputs: [], name: "NoIdsAndAmountsProvided", type: "error" },
-  { inputs: [], name: "Permit2CallFailed", type: "error" },
-  {
-    inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
-    name: "PrematureWithdrawal",
-    type: "error",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "existingCaller", type: "address" },
-    ],
-    name: "ReentrantCall",
-    type: "error",
-  },
-  { inputs: [], name: "TStoreAlreadyActivated", type: "error" },
-  { inputs: [], name: "TStoreNotSupported", type: "error" },
-  { inputs: [], name: "TloadTestContractDeploymentFailed", type: "error" },
-  {
-    inputs: [
-      { internalType: "address", name: "operator", type: "address" },
-      { internalType: "address", name: "from", type: "address" },
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "uint256", name: "id", type: "uint256" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-    ],
-    name: "UnallocatedTransfer",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint96",
-        name: "allocatorId",
-        type: "uint96",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "allocator",
-        type: "address",
-      },
-    ],
-    name: "AllocatorRegistered",
-    type: "event",
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -141,65 +33,12 @@ export const COMPACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "__activateTstore",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
-    name: "__benchmark",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
     inputs: [
       { internalType: "address", name: "allocator", type: "address" },
       { internalType: "bytes", name: "proof", type: "bytes" },
     ],
     name: "__registerAllocator",
     outputs: [{ internalType: "uint96", name: "", type: "uint96" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "bytes", name: "allocatorData", type: "bytes" },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "expires", type: "uint256" },
-          {
-            components: [
-              { internalType: "uint256", name: "id", type: "uint256" },
-              {
-                components: [
-                  {
-                    internalType: "uint256",
-                    name: "claimant",
-                    type: "uint256",
-                  },
-                  { internalType: "uint256", name: "amount", type: "uint256" },
-                ],
-                internalType: "struct Component[]",
-                name: "portions",
-                type: "tuple[]",
-              },
-            ],
-            internalType: "struct ComponentsById[]",
-            name: "transfers",
-            type: "tuple[]",
-          },
-        ],
-        internalType: "struct AllocatedBatchTransfer",
-        name: "transfer",
-        type: "tuple",
-      },
-    ],
-    name: "allocatedBatchTransfer",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -284,227 +123,6 @@ export const COMPACT_ABI = [
           { internalType: "uint256", name: "expires", type: "uint256" },
           { internalType: "bytes32", name: "witness", type: "bytes32" },
           { internalType: "string", name: "witnessTypestring", type: "string" },
-          {
-            components: [
-              { internalType: "uint256", name: "id", type: "uint256" },
-              {
-                internalType: "uint256",
-                name: "allocatedAmount",
-                type: "uint256",
-              },
-              {
-                components: [
-                  {
-                    internalType: "uint256",
-                    name: "claimant",
-                    type: "uint256",
-                  },
-                  { internalType: "uint256", name: "amount", type: "uint256" },
-                ],
-                internalType: "struct Component[]",
-                name: "portions",
-                type: "tuple[]",
-              },
-            ],
-            internalType: "struct BatchClaimComponent[]",
-            name: "claims",
-            type: "tuple[]",
-          },
-        ],
-        internalType: "struct BatchClaim",
-        name: "claimPayload",
-        type: "tuple",
-      },
-    ],
-    name: "batchClaim",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256[2][]",
-        name: "idsAndAmounts",
-        type: "uint256[2][]",
-      },
-      { internalType: "address", name: "recipient", type: "address" },
-    ],
-    name: "batchDeposit",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "recipient", type: "address" },
-      {
-        internalType: "uint256[2][]",
-        name: "idsAndAmounts",
-        type: "uint256[2][]",
-      },
-      { internalType: "address", name: "arbiter", type: "address" },
-      { internalType: "uint256", name: "nonce", type: "uint256" },
-      { internalType: "uint256", name: "expires", type: "uint256" },
-      { internalType: "bytes32", name: "typehash", type: "bytes32" },
-      { internalType: "bytes32", name: "witness", type: "bytes32" },
-    ],
-    name: "batchDepositAndRegisterFor",
-    outputs: [
-      { internalType: "bytes32", name: "claimHash", type: "bytes32" },
-      {
-        internalType: "uint256[]",
-        name: "registeredAmounts",
-        type: "uint256[]",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256[2][]",
-        name: "idsAndAmounts",
-        type: "uint256[2][]",
-      },
-      {
-        internalType: "bytes32[2][]",
-        name: "claimHashesAndTypehashes",
-        type: "bytes32[2][]",
-      },
-    ],
-    name: "batchDepositAndRegisterMultiple",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "depositor", type: "address" },
-      {
-        components: [
-          { internalType: "address", name: "token", type: "address" },
-          { internalType: "uint256", name: "amount", type: "uint256" },
-        ],
-        internalType: "struct ISignatureTransfer.TokenPermissions[]",
-        name: "permitted",
-        type: "tuple[]",
-      },
-      {
-        components: [
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "deadline", type: "uint256" },
-          { internalType: "bytes12", name: "lockTag", type: "bytes12" },
-        ],
-        internalType: "struct DepositDetails",
-        name: "",
-        type: "tuple",
-      },
-      { internalType: "bytes32", name: "", type: "bytes32" },
-      { internalType: "enum CompactCategory", name: "", type: "uint8" },
-      { internalType: "string", name: "witness", type: "string" },
-      { internalType: "bytes", name: "signature", type: "bytes" },
-    ],
-    name: "batchDepositAndRegisterViaPermit2",
-    outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "", type: "address" },
-      {
-        components: [
-          { internalType: "address", name: "token", type: "address" },
-          { internalType: "uint256", name: "amount", type: "uint256" },
-        ],
-        internalType: "struct ISignatureTransfer.TokenPermissions[]",
-        name: "permitted",
-        type: "tuple[]",
-      },
-      {
-        components: [
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "deadline", type: "uint256" },
-          { internalType: "bytes12", name: "lockTag", type: "bytes12" },
-        ],
-        internalType: "struct DepositDetails",
-        name: "",
-        type: "tuple",
-      },
-      { internalType: "address", name: "recipient", type: "address" },
-      { internalType: "bytes", name: "signature", type: "bytes" },
-    ],
-    name: "batchDepositViaPermit2",
-    outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "bytes", name: "allocatorData", type: "bytes" },
-          { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-          { internalType: "address", name: "sponsor", type: "address" },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "expires", type: "uint256" },
-          { internalType: "bytes32", name: "witness", type: "bytes32" },
-          { internalType: "string", name: "witnessTypestring", type: "string" },
-          {
-            components: [
-              { internalType: "uint256", name: "id", type: "uint256" },
-              {
-                internalType: "uint256",
-                name: "allocatedAmount",
-                type: "uint256",
-              },
-              {
-                components: [
-                  {
-                    internalType: "uint256",
-                    name: "claimant",
-                    type: "uint256",
-                  },
-                  { internalType: "uint256", name: "amount", type: "uint256" },
-                ],
-                internalType: "struct Component[]",
-                name: "portions",
-                type: "tuple[]",
-              },
-            ],
-            internalType: "struct BatchClaimComponent[]",
-            name: "claims",
-            type: "tuple[]",
-          },
-          {
-            internalType: "bytes32[]",
-            name: "additionalChains",
-            type: "bytes32[]",
-          },
-        ],
-        internalType: "struct BatchMultichainClaim",
-        name: "claimPayload",
-        type: "tuple",
-      },
-    ],
-    name: "batchMultichainClaim",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "bytes", name: "allocatorData", type: "bytes" },
-          { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-          { internalType: "address", name: "sponsor", type: "address" },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "expires", type: "uint256" },
-          { internalType: "bytes32", name: "witness", type: "bytes32" },
-          { internalType: "string", name: "witnessTypestring", type: "string" },
           { internalType: "uint256", name: "id", type: "uint256" },
           { internalType: "uint256", name: "allocatedAmount", type: "uint256" },
           {
@@ -524,13 +142,6 @@ export const COMPACT_ABI = [
     ],
     name: "claim",
     outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256[]", name: "nonces", type: "uint256[]" }],
-    name: "consume",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -589,68 +200,6 @@ export const COMPACT_ABI = [
   },
   {
     inputs: [
-      {
-        components: [
-          {
-            components: [
-              { internalType: "address", name: "token", type: "address" },
-              { internalType: "uint256", name: "amount", type: "uint256" },
-            ],
-            internalType: "struct ISignatureTransfer.TokenPermissions",
-            name: "permitted",
-            type: "tuple",
-          },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "deadline", type: "uint256" },
-        ],
-        internalType: "struct ISignatureTransfer.PermitTransferFrom",
-        name: "permit",
-        type: "tuple",
-      },
-      { internalType: "address", name: "depositor", type: "address" },
-      { internalType: "bytes12", name: "", type: "bytes12" },
-      { internalType: "bytes32", name: "claimHash", type: "bytes32" },
-      { internalType: "enum CompactCategory", name: "", type: "uint8" },
-      { internalType: "string", name: "witness", type: "string" },
-      { internalType: "bytes", name: "signature", type: "bytes" },
-    ],
-    name: "depositERC20AndRegisterViaPermit2",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            components: [
-              { internalType: "address", name: "token", type: "address" },
-              { internalType: "uint256", name: "amount", type: "uint256" },
-            ],
-            internalType: "struct ISignatureTransfer.TokenPermissions",
-            name: "permitted",
-            type: "tuple",
-          },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "deadline", type: "uint256" },
-        ],
-        internalType: "struct ISignatureTransfer.PermitTransferFrom",
-        name: "permit",
-        type: "tuple",
-      },
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "bytes12", name: "", type: "bytes12" },
-      { internalType: "address", name: "recipient", type: "address" },
-      { internalType: "bytes", name: "signature", type: "bytes" },
-    ],
-    name: "depositERC20ViaPermit2",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
       { internalType: "bytes12", name: "lockTag", type: "bytes12" },
       { internalType: "address", name: "recipient", type: "address" },
     ],
@@ -699,65 +248,6 @@ export const COMPACT_ABI = [
     inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
     name: "enableForcedWithdrawal",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "bytes", name: "allocatorData", type: "bytes" },
-          { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-          { internalType: "address", name: "sponsor", type: "address" },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "expires", type: "uint256" },
-          { internalType: "bytes32", name: "witness", type: "bytes32" },
-          { internalType: "string", name: "witnessTypestring", type: "string" },
-          {
-            components: [
-              { internalType: "uint256", name: "id", type: "uint256" },
-              {
-                internalType: "uint256",
-                name: "allocatedAmount",
-                type: "uint256",
-              },
-              {
-                components: [
-                  {
-                    internalType: "uint256",
-                    name: "claimant",
-                    type: "uint256",
-                  },
-                  { internalType: "uint256", name: "amount", type: "uint256" },
-                ],
-                internalType: "struct Component[]",
-                name: "portions",
-                type: "tuple[]",
-              },
-            ],
-            internalType: "struct BatchClaimComponent[]",
-            name: "claims",
-            type: "tuple[]",
-          },
-          {
-            internalType: "bytes32[]",
-            name: "additionalChains",
-            type: "bytes32[]",
-          },
-          { internalType: "uint256", name: "chainIndex", type: "uint256" },
-          {
-            internalType: "uint256",
-            name: "notarizedChainId",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct ExogenousBatchMultichainClaim",
-        name: "claimPayload",
-        type: "tuple",
-      },
-    ],
-    name: "exogenousBatchClaim",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -882,36 +372,6 @@ export const COMPACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "getRequiredWithdrawalFallbackStipends",
-    outputs: [
-      { internalType: "uint256", name: "nativeTokenStipend", type: "uint256" },
-      { internalType: "uint256", name: "erc20TokenStipend", type: "uint256" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "nonce", type: "uint256" },
-      { internalType: "address", name: "allocator", type: "address" },
-    ],
-    name: "hasConsumedAllocatorNonce",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "owner", type: "address" },
-      { internalType: "address", name: "spender", type: "address" },
-    ],
-    name: "isOperator",
-    outputs: [{ internalType: "bool", name: "status", type: "bool" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       { internalType: "address", name: "sponsor", type: "address" },
       { internalType: "bytes32", name: "claimHash", type: "bytes32" },
@@ -920,44 +380,6 @@ export const COMPACT_ABI = [
     name: "isRegistered",
     outputs: [{ internalType: "bool", name: "isActive", type: "bool" }],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: "bytes", name: "allocatorData", type: "bytes" },
-          { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-          { internalType: "address", name: "sponsor", type: "address" },
-          { internalType: "uint256", name: "nonce", type: "uint256" },
-          { internalType: "uint256", name: "expires", type: "uint256" },
-          { internalType: "bytes32", name: "witness", type: "bytes32" },
-          { internalType: "string", name: "witnessTypestring", type: "string" },
-          { internalType: "uint256", name: "id", type: "uint256" },
-          { internalType: "uint256", name: "allocatedAmount", type: "uint256" },
-          {
-            components: [
-              { internalType: "uint256", name: "claimant", type: "uint256" },
-              { internalType: "uint256", name: "amount", type: "uint256" },
-            ],
-            internalType: "struct Component[]",
-            name: "claimants",
-            type: "tuple[]",
-          },
-          {
-            internalType: "bytes32[]",
-            name: "additionalChains",
-            type: "bytes32[]",
-          },
-        ],
-        internalType: "struct MultichainClaim",
-        name: "claimPayload",
-        type: "tuple",
-      },
-    ],
-    name: "multichainClaim",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -985,68 +407,6 @@ export const COMPACT_ABI = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "bytes32", name: "typehash", type: "bytes32" },
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "address", name: "sponsor", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "bytes32", name: "", type: "bytes32" },
-      { internalType: "bytes32", name: "", type: "bytes32" },
-      { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-    ],
-    name: "registerBatchFor",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "bytes32", name: "typehash", type: "bytes32" },
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "address", name: "sponsor", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "bytes12", name: "", type: "bytes12" },
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "bytes32", name: "", type: "bytes32" },
-      { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-    ],
-    name: "registerFor",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "bytes32", name: "typehash", type: "bytes32" },
-      { internalType: "address", name: "sponsor", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "bytes32", name: "", type: "bytes32" },
-      { internalType: "uint256", name: "notarizedChainId", type: "uint256" },
-      { internalType: "bytes", name: "sponsorSignature", type: "bytes" },
-    ],
-    name: "registerMultichainFor",
-    outputs: [{ internalType: "bytes32", name: "claimHash", type: "bytes32" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32[2][]",
-        name: "claimHashesAndTypehashes",
-        type: "bytes32[2][]",
-      },
-    ],
-    name: "registerMultiple",
-    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [{ internalType: "bytes12", name: "lockTag", type: "bytes12" }],
     name: "scheduleEmissaryAssignment",
     outputs: [
@@ -1067,13 +427,6 @@ export const COMPACT_ABI = [
     name: "setOperator",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "bytes4", name: "interfaceId", type: "bytes4" }],
-    name: "supportsInterface",
-    outputs: [{ internalType: "bool", name: "result", type: "bool" }],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -1144,19 +497,6 @@ export const ERC20_ABI = [
     outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "_from", type: "address" },
-      { name: "_to", type: "address" },
-      { name: "_value", type: "uint256" },
-    ],
-    name: "transferFrom",
-    outputs: [{ name: "success", type: "bool" }],
-    payable: false,
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1243,42 +583,5 @@ export const ERC20_ABI = [
     payable: false,
     stateMutability: "view",
     type: "function",
-  },
-  {
-    inputs: [
-      { name: "initialSupply", type: "uint256" },
-      { name: "tokenName", type: "string" },
-      { name: "tokenSymbol", type: "string" },
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-] as const;
-
-export const SEPOLIA_TOKENS = [
-  {
-    address: "0x779877A7B0D9E8603169DdbD7836e478b4624789" as const,
-    symbol: "LINK",
-    name: "Chainlink Token",
-    decimals: 18,
-  },
-  {
-    address: "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238" as const,
-    symbol: "USDC",
-    name: "USDC Token",
-    decimals: 18,
-  },
-  {
-    address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14" as const,
-    symbol: "WETH",
-    name: "Wrapped Ether",
-    decimals: 18,
-  },
-  {
-    address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" as const,
-    symbol: "UNI",
-    name: "Uniswap",
-    decimals: 18,
   },
 ] as const;

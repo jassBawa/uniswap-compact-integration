@@ -3,13 +3,14 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui';
 import DepositTab from './deposit/DepositTab';
-import { ClaimTab } from './claim/ClaimTab';
+import { ProtocolClaimTab } from './claim/ProtocolClaimTab';
 import { WithdrawTab } from './withdraw/WithdrawTab';
 
 const TABS = [
   { id: 'deposit', label: 'Deposit' },
+  { id: 'deposit-register', label: 'Deposit & Register' },
   { id: 'withdraw', label: 'Withdraw' },
-  { id: 'claim', label: 'Claim' },
+  { id: 'protocol-claim', label: 'Protocol Claim' },
 ];
 
 export function ProtocolTabs() {
@@ -30,11 +31,14 @@ export function ProtocolTabs() {
           <TabsContent value="deposit">
             <DepositTab />
           </TabsContent>
+          <TabsContent value="deposit-register">
+            <DepositTab mode="register" />
+          </TabsContent>
           <TabsContent value="withdraw">
             <WithdrawTab />
           </TabsContent>
-          <TabsContent value="claim">
-            <ClaimTab />
+          <TabsContent value="protocol-claim">
+            <ProtocolClaimTab />
           </TabsContent>
         </div>
       </div>

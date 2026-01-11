@@ -5,14 +5,14 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 interface DropdownOption {
-  value: string | number;
+  value: string | number | bigint;
   label: string;
 }
 
 interface DropdownProps {
   options: DropdownOption[];
-  value: string | number;
-  onChange: (value: string | number) => void;
+  value: string | number | bigint;
+  onChange: (value: string | number | bigint) => void;
   placeholder?: string;
   className?: string;
 }
@@ -21,7 +21,11 @@ function Dropdown({ options, value, onChange, placeholder, className }: Dropdown
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedOption = options.find((opt) =>
+    typeof opt.value === "bigint" && typeof value === "bigint"
+      ? opt.value === value
+      : opt.value === value
+  );
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -56,7 +60,7 @@ function Dropdown({ options, value, onChange, placeholder, className }: Dropdown
           <div className="p-1">
             {options.map((option) => (
               <button
-                key={option.value}
+                key={String(option.value)}
                 type="button"
                 onClick={() => {
                   onChange(option.value);
@@ -65,7 +69,7 @@ function Dropdown({ options, value, onChange, placeholder, className }: Dropdown
                 className={cn(
                   "relative flex w-full cursor-default items-center rounded-md py-2 pl-8 pr-3 text-sm outline-none transition-colors",
                   "hover:bg-accent focus:bg-accent",
-                  option.value === value && "bg-accent text-accent-foreground font-medium"
+                  (typeof option.value === "bigint" && typeof value === "bigint" ? option.value === value : option.value === value) && "bg-accent text-accent-foreground font-medium"
                 )}
               >
                 {option.label}
