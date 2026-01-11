@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { isAddress, parseUnits } from "viem";
 import {
-  useAccount,
+  useConnection,
   useBalance,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -18,7 +18,7 @@ interface UseDepositErc20Props {
 }
 
 export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { showToast, dismissAll } = useToast();
   const queryClient = useQueryClient();
   const toastIdRef = useRef<number | string | null>(null);
@@ -63,7 +63,6 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
     if (isSuccess && receipt && hash) {
       dismissAll();
 
-      // Only handle deposit success, not approve
       if (pendingActionRef.current === "deposit") {
         queryClient.invalidateQueries({ queryKey: balanceQueryKey });
 
@@ -82,7 +81,6 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
           onSuccess?.(lockId);
         }
       } else if (pendingActionRef.current === "approve") {
-        // Invalidate ERC20 allowance queries to update needsApproval
         queryClient.invalidateQueries();
         showToast("success", "Tokens approved!", hash);
       }

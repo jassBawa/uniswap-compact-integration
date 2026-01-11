@@ -102,8 +102,8 @@ async function generateAllocatorSignature(
 }
 
 export function useCompactClaim() {
-  const { signTypedDataAsync } = useSignTypedData();
-  const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const { mutateAsync: signTypedDataAsync } = useSignTypedData();
+  const { mutate: writeContract, data: hash, error: writeError } = useWriteContract();
 
   const handleClaim = async ({
     lockId,

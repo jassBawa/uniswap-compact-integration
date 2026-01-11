@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { isAddress } from "viem";
 import {
-  useAccount,
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useConnection,
 } from "wagmi";
 
 import { ERC20_ABI } from "@/lib/abis/protocol";
@@ -26,20 +26,17 @@ interface UseERC20Return {
 }
 
 export function useERC20(tokenAddress?: string): UseERC20Return {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const [lastApprovedAmount, setLastApprovedAmount] = useState<bigint | null>(null);
 
   const isValidAddress = tokenAddress ? isAddress(tokenAddress) : false;
-  console.log(`[useERC20] tokenAddress: ${tokenAddress}, isValidAddress: ${isValidAddress}, address: ${address}`);
 
-  // Read token name
   const { data: name } = useReadContract({
     address: isValidAddress ? tokenAddress as `0x${string}` : undefined,
     abi: ERC20_ABI,
     functionName: "name",
     query: { enabled: isValidAddress },
   });
-  console.log(`[useERC20] name: ${name}`);
 
   // Read token symbol
   const { data: symbol } = useReadContract({
@@ -48,7 +45,6 @@ export function useERC20(tokenAddress?: string): UseERC20Return {
     functionName: "symbol",
     query: { enabled: isValidAddress },
   });
-  console.log(`[useERC20] symbol: ${symbol}`);
 
   // Read token decimals
   const { data: decimalsData } = useReadContract({
@@ -58,7 +54,6 @@ export function useERC20(tokenAddress?: string): UseERC20Return {
     query: { enabled: isValidAddress },
   });
   const decimals = decimalsData ? Number(decimalsData) : undefined;
-  console.log(`[useERC20] decimals: ${decimals}, decimalsData: ${decimalsData}`);
 
   // Read user balance
   const { data: rawBalance } = useReadContract({
@@ -68,7 +63,6 @@ export function useERC20(tokenAddress?: string): UseERC20Return {
     args: address ? [address] : undefined,
     query: { enabled: isValidAddress && !!address },
   });
-  console.log(`[useERC20] rawBalance: ${rawBalance?.toString()}`);
 
   // Read allowance for protocol
   const { data: rawAllowance } = useReadContract({
@@ -79,7 +73,6 @@ export function useERC20(tokenAddress?: string): UseERC20Return {
       address && PROTOCOL_ADDRESS ? [address, PROTOCOL_ADDRESS] : undefined,
     query: { enabled: isValidAddress && !!address && !!PROTOCOL_ADDRESS },
   });
-  console.log(`[useERC20] rawAllowance: ${rawAllowance?.toString()}, address: ${address}, PROTOCOL_ADDRESS: ${PROTOCOL_ADDRESS}`);
 
   // Format balance
   const balance = useCallback(() => {
@@ -125,8 +118,6 @@ export function useERC20(tokenAddress?: string): UseERC20Return {
     });
   }, [tokenAddress, address, approveMutate]);
 
-  // Compute isLoading directly - avoid stale closures by not using a callback
-  // isLoading is true when we have a valid address and are still fetching data
   const isLoading = isValidAddress && (
     name === undefined ||
     symbol === undefined ||

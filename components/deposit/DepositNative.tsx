@@ -11,11 +11,8 @@ import { useMaxAmount } from "@/hooks/useMaxAmount";
 import { ALLOCATORS, RESET_PERIODS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-interface DepositNativeProps {
-  onSuccess?: (lockId: string) => void;
-}
 
-export function DepositNative({ onSuccess }: DepositNativeProps) {
+export function DepositNative() {
   const { isConnected } = useConnection();
   const [amount, setAmount] = useState("");
   const [resetPeriod, setResetPeriod] = useState<number>(2);
@@ -27,7 +24,6 @@ export function DepositNative({ onSuccess }: DepositNativeProps) {
   const { deposit, isPending, ethBalance } = useDepositNative({
     onSuccess: (lockId) => {
       setLastLockId(lockId);
-      onSuccess?.(lockId);
     },
   });
 

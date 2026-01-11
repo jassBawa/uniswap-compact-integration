@@ -1,13 +1,12 @@
 'use client';
 
+import { useCompactClaim } from "@/hooks/useCompactClaim";
+import { EXPLORER_URL } from "@/lib/constants";
 import { AlertTriangle, ExternalLink, User } from "lucide-react";
-import { useState, useCallback, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { parseEther, isAddress } from 'viem';
-import { Input, StatusDot, Card, CardContent, CardHeader, CardFooter, Button } from "./ui";
-import { EXPLORER_URL } from '../lib/constants';
-import { useCompactClaim } from '../hooks/useCompactClaim';
-import { useWaitForTransactionReceipt } from 'wagmi';
+import { useCallback, useEffect, useState } from 'react';
+import { isAddress, parseEther } from 'viem';
+import { useConnection, useWaitForTransactionReceipt } from 'wagmi';
+import { Button, Card, CardContent, CardFooter, CardHeader, Input, StatusDot } from "@/components/ui";
 
 interface ClaimFormData {
   id: string;
@@ -19,7 +18,7 @@ interface ClaimFormData {
 }
 
 export function ClaimTab() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const { handleClaim, hash: hookHash, writeError } = useCompactClaim();
   const [claimMode, setClaimMode] = useState<'transfer' | 'withdraw'>('transfer');
   const [formData, setFormData] = useState<ClaimFormData>({
@@ -191,7 +190,7 @@ export function ClaimTab() {
             type="text"
             placeholder="0"
             value={formData.id}
-            onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
+            onChange={(e: any) => setFormData(prev => ({ ...prev, id: e.target.value }))}
             disabled={!isConnected || isPending}
             className="font-mono"
           />
@@ -209,7 +208,7 @@ export function ClaimTab() {
             type="text"
             placeholder="0.0000"
             value={formData.amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+            onChange={(e:any) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
             disabled={!isConnected || isPending}
             className="font-mono"
           />
@@ -233,7 +232,7 @@ export function ClaimTab() {
             type="text"
             placeholder="0x..."
             value={formData.recipient}
-            onChange={(e) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
+            onChange={(e:any) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
             disabled={!isConnected || isPending}
             className={`font-mono ${formData.recipient && !isAddress(formData.recipient) ? 'border-red-500' : ''}`}
           />
@@ -273,7 +272,7 @@ export function ClaimTab() {
                 type="text"
                 placeholder="0x..."
                 value={formData.sponsor}
-                onChange={(e) => setFormData(prev => ({ ...prev, sponsor: e.target.value }))}
+                onChange={(e:any) => setFormData(prev => ({ ...prev, sponsor: e.target.value }))}
                 disabled={!isConnected || isPending}
                 className="font-mono"
               />
@@ -288,7 +287,7 @@ export function ClaimTab() {
                   type="text"
                   placeholder="0"
                   value={formData.nonce}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nonce: e.target.value }))}
+                  onChange={(e:any) => setFormData(prev => ({ ...prev, nonce: e.target.value }))}
                   disabled={!isConnected || isPending}
                   className="font-mono"
                 />
@@ -309,7 +308,7 @@ export function ClaimTab() {
                   type="text"
                   placeholder="Unix timestamp"
                   value={formData.expires}
-                  onChange={(e) => setFormData(prev => ({ ...prev, expires: e.target.value }))}
+                  onChange={(e:any) => setFormData(prev => ({ ...prev, expires: e.target.value }))}
                   disabled={!isConnected || isPending}
                   className="font-mono"
                 />

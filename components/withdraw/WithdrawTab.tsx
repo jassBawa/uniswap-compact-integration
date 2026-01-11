@@ -33,7 +33,6 @@ export function WithdrawTab() {
   const tokenAddress = lockDetails?.[0];
   const isNative = tokenAddress === "0x0000000000000000000000000000000000000000";
 
-  // Fetch token decimals
   const { data: tokenDecimalsData } = useReadContract({
     address: isNative ? undefined : (tokenAddress as `0x${string}`),
     abi: ERC20_ABI,
@@ -42,7 +41,6 @@ export function WithdrawTab() {
   });
   const tokenDecimals = isNative ? 18 : (tokenDecimalsData ? Number(tokenDecimalsData) : 18);
 
-  // Fetch balance
   const { data: balanceRaw } = useReadContract({
     address: PROTOCOL_ADDRESS as `0x${string}`,
     abi: COMPACT_ABI,
@@ -55,7 +53,6 @@ export function WithdrawTab() {
   const hasValidAddress = address && address !== "0x0000000000000000000000000000000000000000";
   const hasValidLockId = lockId.length === 66 && lockId.startsWith("0x");
 
-  // Fetch withdrawal status
   const withdrawalStatusQuery = useReadContract({
     address: PROTOCOL_ADDRESS as `0x${string}`,
     abi: COMPACT_ABI,
@@ -72,7 +69,6 @@ export function WithdrawTab() {
     [status, withdrawableAt]
   );
 
-  // Auto-refetch when maturity approaches
   const refetchRef = useRef(withdrawalStatusQuery.refetch);
   refetchRef.current = withdrawalStatusQuery.refetch;
 
@@ -109,7 +105,7 @@ export function WithdrawTab() {
     Array<{ label: string; status: "upcoming" | "loading" | "success" }>
   >(() => [
     { label: "Enable Forced Withdrawal", status: status === 0 ? "upcoming" : "success" },
-    { label: "Wait for Reset Period", status: status === 1 && !canWithdraw ? "loading" : "success" },
+    { label: "Wait for Reset Period", status: status === 0 ? "upcoming" : !canWithdraw ? "loading" : "success" },
     { label: "Execute Withdrawal", status: isActuallyFinished ? "success" : canWithdraw ? "loading" : "upcoming" },
   ], [status, canWithdraw, isActuallyFinished]);
 
@@ -131,6 +127,9 @@ export function WithdrawTab() {
   };
 
   const hasZeroBalance = !balance || balance === BigInt(0);
+
+
+  console.log(status);
 
   return (
     <Card>

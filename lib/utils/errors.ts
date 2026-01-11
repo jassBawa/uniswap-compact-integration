@@ -1,30 +1,35 @@
-/**
- * Map contract errors to user-friendly messages
- */
+type ErrorPattern = {
+  test: (message: string) => boolean;
+  message: string;
+};
+
+const COMPACT_ERRORS: readonly ErrorPattern[] = [
+  { test: (m) => m.includes("Expired()"), message: "The signature has expired." },
+  { test: (m) => m.includes("InvalidSignature()"), message: "The provided signature is invalid." },
+  { test: (m) => m.includes("NonceAlreadyUsed()"), message: "This transaction nonce has already been used." },
+  { test: (m) => m.includes("InsufficientBalance()"), message: "Your balance in lock is insufficient." },
+  { test: (m) => m.includes("ResetPeriodNotOver()"), message: "The reset period has not finished yet." },
+  { test: (m) => m.includes("Unauthorized()"), message: "You are not authorized to perform this action." },
+];
+
+const WEB3_ERRORS: readonly ErrorPattern[] = [
+  { test: (m) => m.includes("user rejected action"), message: "Transaction was rejected in your wallet." },
+  { test: (m) => m.includes("insufficient funds for gas"), message: "You do not have enough ETH for gas fees." },
+  { test: (m) => m.includes("execution reverted"), message: "Transaction failed. Check your inputs and try again." },
+];
+
+function findErrorMessage(patterns: readonly ErrorPattern[], message: string): string | null {
+  return patterns.find(({ test }) => test(message))?.message ?? null;
+}
+
 export function mapContractError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
-  console.log(error);
-  // Common Compact Errors
-  if (message.includes("Expired()")) return "The signature has expired.";
-  if (message.includes("InvalidSignature()"))
-    return "The provided signature is invalid.";
-  if (message.includes("NonceAlreadyUsed()"))
-    return "This transaction nonce has already been used.";
-  if (message.includes("InsufficientBalance()"))
-    return "Your balance in the lock is insufficient.";
-  if (message.includes("ResetPeriodNotOver()"))
-    return "The reset period has not finished yet.";
-  if (message.includes("Unauthorized()"))
-    return "You are not authorized to perform this action.";
 
-  // Generic Web3 Errors
-  if (message.includes("user rejected action"))
-    return "Transaction was rejected in your wallet.";
-  if (message.includes("insufficient funds for gas"))
-    return "You do not have enough ETH for gas fees.";
-  if (message.includes("execution reverted"))
-    return "Transaction failed. Check your inputs and try again.";
+  const compactError = findErrorMessage(COMPACT_ERRORS, message);
+  if (compactError) return compactError;
 
-  // Return first line of the error message
+  const web3Error = findErrorMessage(WEB3_ERRORS, message);
+  if (web3Error) return web3Error;
+
   return message.split("\n")[0];
 }

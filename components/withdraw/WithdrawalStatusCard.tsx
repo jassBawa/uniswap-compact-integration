@@ -1,7 +1,7 @@
 "use client";
 
 import { FORCED_WITHDRAWAL_STATUS } from "@/lib/constants";
-import { TransactionProgress } from "./TransactionProgress";
+import { TransactionProgress } from "../TransactionProgress";
 
 interface WithdrawalStatusCardProps {
   status: number;
@@ -11,6 +11,9 @@ interface WithdrawalStatusCardProps {
 }
 
 export function WithdrawalStatusCard({ status, withdrawableAt, canWithdraw, progressSteps }: WithdrawalStatusCardProps) {
+  const isPending = status === 1 || (status === 2 && !canWithdraw);
+  const isReady = status === 2 && canWithdraw;
+
   return (
     <div className="mb-8 space-y-8 animate-fade-in">
       <div className="px-2">
@@ -21,7 +24,7 @@ export function WithdrawalStatusCard({ status, withdrawableAt, canWithdraw, prog
         className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
           status === 0
             ? "bg-secondary/20 border-border"
-            : status === 1 || (status === 2 && !canWithdraw)
+            : isPending
             ? "bg-amber-500/10 border-amber-500/30"
             : "bg-emerald-500/10 border-emerald-500/30"
         }`}
@@ -32,7 +35,7 @@ export function WithdrawalStatusCard({ status, withdrawableAt, canWithdraw, prog
               className={`w-2 h-2 rounded-full ${
                 status === 0
                   ? "bg-muted-foreground"
-                  : status === 1 || (status === 2 && !canWithdraw)
+                  : isPending
                   ? "bg-amber-500 animate-pulse"
                   : "bg-emerald-500"
               }`}
@@ -45,7 +48,7 @@ export function WithdrawalStatusCard({ status, withdrawableAt, canWithdraw, prog
                 className={`text-sm font-bold ${
                   status === 0
                     ? "text-muted-foreground"
-                    : status === 1 || (status === 2 && !canWithdraw)
+                    : isPending
                     ? "text-amber-500"
                     : "text-emerald-500"
                 }`}
@@ -54,7 +57,7 @@ export function WithdrawalStatusCard({ status, withdrawableAt, canWithdraw, prog
               </h4>
             </div>
           </div>
-          {(status === 1 || status === 2) && !canWithdraw && (
+          {!canWithdraw && (status === 1 || status === 2) && (
             <div className="text-right">
               <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-wider mb-1">
                 Maturity Date
