@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui';
-import DepositTab from './deposit/DepositTab';
-import { ProtocolClaimTab } from './claim/ProtocolClaimTab';
-import { WithdrawTab } from './withdraw/WithdrawTab';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui";
+import DepositTab from "./deposit/DepositTab";
+import { DepositNativeAndRegister } from "./deposit/native/DepositNativeAndRegister";
+import { ProtocolClaimTab } from "./claim/ProtocolClaimTab";
+import { WithdrawTab } from "./withdraw/WithdrawTab";
 
 const TABS = [
-  { id: 'deposit', label: 'Deposit' },
-  { id: 'deposit-register', label: 'Deposit & Register' },
-  { id: 'withdraw', label: 'Withdraw' },
-  { id: 'protocol-claim', label: 'Protocol Claim' },
+  { id: "deposit", label: "Deposit" },
+  { id: "deposit-register", label: "Deposit & Register" },
+  { id: "withdraw", label: "Withdraw" },
+  { id: "protocol-claim", label: "Protocol Claim" },
 ];
 
 export function ProtocolTabs() {
@@ -32,7 +32,7 @@ export function ProtocolTabs() {
             <DepositTab />
           </TabsContent>
           <TabsContent value="deposit-register">
-            <DepositTab mode="register" />
+            <DepositNativeAndRegister />
           </TabsContent>
           <TabsContent value="withdraw">
             <WithdrawTab />

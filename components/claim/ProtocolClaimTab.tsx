@@ -1,15 +1,20 @@
 "use client";
 
-import { Link, User } from "lucide-react";
+import { Link } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 import { useConnection } from "wagmi";
 
-import { Button, Dropdown, Input } from "@/components/ui";
-import { useProtocolClaim } from "@/hooks/useProtocolClaim";
-import { useMaxAmount } from "@/hooks/useMaxAmount";
+import { Button } from "@/components/ui";
+import {
+  useProtocolClaim,
+  computeLockTag,
+} from "@/hooks/useProtocolClaim";
 import { ALLOCATORS, RESET_PERIODS } from "@/lib/constants";
-import { Address } from "viem";
+import { ClaimantSection } from "./ClaimantSection";
+import { MandateSection } from "./MandateSection";
+import { CompactParametersSection } from "../common/compact/CompactParametersSection";
+import { DepositDetailsSection } from "../common/compact/DepositDetailsSection";
 
 export function ProtocolClaimTab() {
   const { isConnected, address } = useConnection();
@@ -37,13 +42,12 @@ export function ProtocolClaimTab() {
   const [claimant, setClaimant] = useState("");
   const [claimantAmount, setClaimantAmount] = useState("");
 
-  const { claim, isPending, hash, isSuccess } = useProtocolClaim();
-  const { handleMax, formattedBalance } = useMaxAmount(undefined);
+  const { claim, isPending, hash } = useProtocolClaim();
 
-  // Computed values
+  // Compute lockTag using shared helper
   const lockTag = useMemo(
-    () => (scope << 95n) | (resetPeriod << 92n) | allocatorId,
-    [scope, resetPeriod, allocatorId]
+    () => computeLockTag(allocatorId, scope, resetPeriod),
+    [allocatorId, scope, resetPeriod]
   );
 
   const resetPeriodOptions = useMemo(
@@ -82,12 +86,12 @@ export function ProtocolClaimTab() {
       allocatorId,
       resetPeriod,
       scope,
-      arbiter: arbiter as Address,
-      sponsor: sponsor as Address,
+      arbiter: arbiter as `0x${string}`,
+      sponsor: sponsor as `0x${string}`,
       nonce,
       expires,
       witnessArgument: hasMandate ? witnessArgument : undefined,
-      claimant: claimant as Address,
+      claimant: claimant as `0x${string}`,
       claimantAmount: parseUnits(claimantAmount, 18),
     });
   }, [
@@ -108,320 +112,61 @@ export function ProtocolClaimTab() {
     claim,
   ]);
 
+  const isFormValid =
+    isConnected &&
+    !isPending &&
+    id &&
+    amount &&
+    arbiter &&
+    sponsor &&
+    claimant &&
+    claimantAmount;
+
   return (
     <div className="mt-8 p-2 px-6 space-y-6">
-      {/* Deposit Details Section */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          Deposit Details
-        </h3>
+      <DepositDetailsSection
+        id={id}
+        amount={amount}
+        resetPeriod={resetPeriod}
+        scope={scope}
+        allocatorId={allocatorId}
+        onIdChange={setId}
+        onAmountChange={setAmount}
+        onResetPeriodChange={setResetPeriod}
+        onScopeChange={setScope}
+        onAllocatorIdChange={setAllocatorId}
+      />
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="id"
-            className="text-xs font-medium text-muted-foreground ml-0.5 flex items-center gap-1.5"
-          >
-            ID (Lock ID)
-          </label>
-          <Input
-            id="id"
-            type="text"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            placeholder="0"
-            className="font-mono"
-          />
-        </div>
+      <CompactParametersSection
+        arbiter={arbiter}
+        sponsor={sponsor}
+        nonce={nonce}
+        expires={expires}
+        onArbiterChange={setArbiter}
+        onSponsorChange={setSponsor}
+        onNonceChange={setNonce}
+        onExpiresChange={setExpires}
+        connectedAddress={address}
+      />
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="amount"
-            className="text-xs font-medium text-muted-foreground ml-0.5 flex items-center gap-1.5"
-          >
-            Amount (ETH)
-          </label>
-          <div className="relative">
-            <Input
-              id="amount"
-              type="text"
-              value={amount}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAmount(e.target.value)
-              }
-              placeholder="0.0"
-              className="pr-14 text-lg font-medium"
-            />
-            <button
-              type="button"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
-              onClick={() => setAmount(handleMax())}
-            >
-              MAX
-            </button>
-          </div>
-        </div>
+      <MandateSection
+        hasMandate={hasMandate}
+        witnessArgument={witnessArgument}
+        onHasMandateChange={setHasMandate}
+        onWitnessArgumentChange={setWitnessArgument}
+      />
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-muted-foreground ml-0.5">
-              Allocator
-            </label>
-            <Dropdown
-              options={allocatorOptions}
-              value={allocatorId.toString()}
-              onChange={(v) => setAllocatorId(BigInt(v))}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-muted-foreground ml-0.5">
-              Reset Period
-            </label>
-            <Dropdown
-              options={resetPeriodOptions}
-              value={resetPeriod}
-              onChange={(v) => setResetPeriod(v as bigint)}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-xs font-medium text-muted-foreground ml-0.5">
-            Scope
-          </label>
-          <div className="grid grid-cols-2 gap-2 p-1 bg-secondary/50 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setScope(0n)}
-              className={
-                "py-2 px-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap" +
-                (scope === 0n
-                  ? " bg-primary text-primary-foreground"
-                  : " text-muted-foreground hover:text-foreground hover:bg-accent")
-              }
-            >
-              Multichain
-            </button>
-            <button
-              type="button"
-              onClick={() => setScope(1n)}
-              className={
-                "py-2 px-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap" +
-                (scope === 1n
-                  ? " bg-primary text-primary-foreground"
-                  : " text-muted-foreground hover:text-foreground hover:bg-accent")
-              }
-            >
-              Chain-Specific
-            </button>
-          </div>
-        </div>
-
-        <div className="p-3 bg-secondary/30 rounded-lg">
-          <p className="text-xs text-muted-foreground">
-            Computed Lock Tag:{" "}
-            <span className="font-mono text-foreground">
-              0x{lockTag.toString(16).padStart(24, "0")}
-            </span>
-          </p>
-        </div>
-      </div>
-
-      {/* Compact Parameters Section */}
-      <div className="space-y-4 border-t border-border pt-4">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          Compact Parameters
-        </h3>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="arbiter"
-              className="text-xs font-medium text-muted-foreground ml-0.5 flex items-center gap-1.5"
-            >
-              Arbiter
-              {address && (
-                <button
-                  type="button"
-                  onClick={() => setArbiter(address)}
-                  className="text-xs text-emerald-600 hover:text-emerald-500"
-                >
-                  (use my address)
-                </button>
-              )}
-            </label>
-            <Input
-              id="arbiter"
-              type="text"
-              value={arbiter}
-              onChange={(e) => setArbiter(e.target.value)}
-              placeholder="0x..."
-              className="font-mono"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="sponsor"
-              className="text-xs font-medium text-muted-foreground ml-0.5 flex items-center gap-1.5"
-            >
-              Sponsor
-              {address && (
-                <button
-                  type="button"
-                  onClick={() => setSponsor(address)}
-                  className="text-xs text-emerald-600 hover:text-emerald-500"
-                >
-                  (use my address)
-                </button>
-              )}
-            </label>
-            <Input
-              id="sponsor"
-              type="text"
-              value={sponsor}
-              onChange={(e) => setSponsor(e.target.value)}
-              placeholder="0x..."
-              className="font-mono"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="nonce"
-              className="text-xs font-medium text-muted-foreground ml-0.5"
-            >
-              Nonce
-            </label>
-            <Input
-              id="nonce"
-              type="text"
-              value={nonce.toString()}
-              onChange={(e) => setNonce(BigInt(e.target.value))}
-              placeholder="0"
-              className="font-mono"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label
-              htmlFor="expires"
-              className="text-xs font-medium text-muted-foreground ml-0.5"
-            >
-              Expires (timestamp)
-            </label>
-            <Input
-              id="expires"
-              type="text"
-              value={expires.toString()}
-              onChange={(e) => setExpires(BigInt(e.target.value))}
-              placeholder="Unix timestamp"
-              className="font-mono"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Optional Mandate Section */}
-      <div className="space-y-4 border-t border-border pt-4">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="hasMandate"
-            checked={hasMandate}
-            onChange={(e) => setHasMandate(e.target.checked)}
-            className="rounded border-border"
-          />
-          <label
-            htmlFor="hasMandate"
-            className="text-sm font-medium text-foreground"
-          >
-            Has Mandate (Witness)
-          </label>
-        </div>
-
-        {hasMandate && (
-          <div className="space-y-1.5">
-            <label
-              htmlFor="witnessArgument"
-              className="text-xs font-medium text-muted-foreground ml-0.5"
-            >
-              Witness Argument
-            </label>
-            <Input
-              id="witnessArgument"
-              type="text"
-              value={witnessArgument.toString()}
-              onChange={(e) => setWitnessArgument(BigInt(e.target.value))}
-              placeholder="0"
-              className="font-mono"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Claimant Section */}
-      <div className="space-y-4 border-t border-border pt-4">
-        <h3 className="text-sm font-medium text-muted-foreground">Claimant</h3>
-
-        <div className="space-y-1.5">
-          <label
-            htmlFor="claimant"
-            className="text-xs font-medium text-muted-foreground ml-0.5 flex items-center gap-1.5"
-          >
-            Claimant Address
-            {address && (
-              <button
-                type="button"
-                onClick={() => setClaimant(address)}
-                className="text-xs text-emerald-600 hover:text-emerald-500"
-              >
-                (use my address)
-              </button>
-            )}
-          </label>
-          <Input
-            id="claimant"
-            type="text"
-            value={claimant}
-            onChange={(e) => setClaimant(e.target.value)}
-            placeholder="0x..."
-            className="font-mono"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label
-            htmlFor="claimantAmount"
-            className="text-xs font-medium text-muted-foreground ml-0.5"
-          >
-            Claimant Amount (ETH)
-          </label>
-          <Input
-            id="claimantAmount"
-            type="text"
-            value={claimantAmount}
-            onChange={(e) => setClaimantAmount(e.target.value)}
-            placeholder="0.0"
-            className="font-mono"
-          />
-        </div>
-      </div>
+      <ClaimantSection
+        claimant={claimant}
+        claimantAmount={claimantAmount}
+        onClaimantChange={setClaimant}
+        onClaimantAmountChange={setClaimantAmount}
+        connectedAddress={address}
+      />
 
       <Button
         onClick={handleClaim}
-        disabled={
-          !isConnected ||
-          isPending ||
-          !id ||
-          !amount ||
-          !arbiter ||
-          !sponsor ||
-          !claimant ||
-          !claimantAmount
-        }
+        disabled={!isFormValid}
         loading={isPending}
         className="h-11 text-base font-semibold shadow-sm hover:shadow-md transition-all w-full"
         size="lg"

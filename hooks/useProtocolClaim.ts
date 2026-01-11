@@ -6,7 +6,6 @@ import {
   encodeAbiParameters,
   hashStruct,
   keccak256,
-  parseUnits,
   toBytes,
 } from "viem";
 import {

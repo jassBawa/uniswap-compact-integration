@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "wagmi";
 
 import { Button, Dropdown, Input } from "@/components/ui";
-import { DepositSuccess } from "./DepositSuccess";
+import { DepositSuccess } from "../../common/DepositSuccess";
 import { useDepositNative } from "@/hooks/useDepositNative";
 import { useMaxAmount } from "@/hooks/useMaxAmount";
 import { ALLOCATORS, RESET_PERIODS } from "@/lib/constants";

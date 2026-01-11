@@ -19,7 +19,7 @@ export function useWithdraw() {
 
   const {
     data: hash,
-    writeContract,
+    mutate: writeContract,
     isPending,
     error,
     reset,

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef } from "react";
 import { isAddress, parseUnits } from "viem";
 import {
   useConnection,
-  useBalance,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -30,10 +29,6 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
     isSuccess,
     data: receipt,
   } = useWaitForTransactionReceipt({ hash });
-
-  const { data: ethBalance, queryKey: balanceQueryKey } = useBalance({
-    address,
-  });
 
   useEffect(() => {
     if (isPending) {
@@ -64,7 +59,7 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
       dismissAll();
 
       if (pendingActionRef.current === "deposit") {
-        queryClient.invalidateQueries({ queryKey: balanceQueryKey });
+        queryClient.invalidateQueries();
 
         const transferLog = receipt.logs.find(
           (log) =>
@@ -94,7 +89,6 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
     receipt,
     hash,
     queryClient,
-    balanceQueryKey,
     dismissAll,
     showToast,
     onSuccess,
@@ -196,6 +190,5 @@ export function useDepositErc20({ onSuccess }: UseDepositErc20Props = {}) {
     approve,
     isPending: isPending || isConfirming,
     hash,
-    ethBalance,
   };
 }
